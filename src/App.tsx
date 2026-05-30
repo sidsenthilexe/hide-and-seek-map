@@ -20,7 +20,7 @@ export default function App() {
           padding: "8px 16px",
           borderRadius: 8,
           border: "1px solid #ccc",
-          background: "white",
+          background: "black",
           cursor: "pointer",
         }}
       >Settings</button>

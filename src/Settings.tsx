@@ -47,7 +47,7 @@ export default function Settings({
                 padding: "8px 8px",
                 borderRadius: 8,
                 border: "1px solid #ccc",
-                background: "#f7f7f7",
+                background: "#000000",
                 cursor: "pointer",
             }}
         >Close</button>
