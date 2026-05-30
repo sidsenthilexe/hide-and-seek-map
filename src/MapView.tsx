@@ -19,19 +19,16 @@ export default function MapView({scaleUnit}: {scaleUnit: ScaleUnit}) {
             zoom: 1.5,
         });
 
-        if (!scaleRef.current)  {
-            scaleRef.current = new maplibregl.ScaleControl({
-                maxWidth: 120,
-                unit: scaleUnit,
-            });
-            mapRef.current.addControl(scaleRef.current, "bottom-left");
-        } else {
-            scaleRef.current.setUnit(scaleUnit);
-        }
+        scaleRef.current = new maplibregl.ScaleControl({
+            maxWidth: 120,
+            unit: scaleUnit
+        })
+        mapRef.current.addControl(scaleRef.current, "bottom-left");
 
         return () => {
             mapRef.current?.remove();
             mapRef.current = null;
+            scaleRef.current = null;
         };
     }, [scaleUnit]);
 
