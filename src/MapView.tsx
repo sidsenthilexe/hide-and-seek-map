@@ -17,7 +17,7 @@ export default function MapView() {
         });
 
         mapRef.current.addControl(
-            new maplibregl.ScaleControl({maxWidth: 120, unit: "metric"}),
+            new maplibregl.ScaleControl({maxWidth: 120, unit: "imperial"}),
             "bottom-left"
         );
 
