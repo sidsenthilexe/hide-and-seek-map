@@ -10,7 +10,7 @@ export default function App() {
 
   const MIN_WIDTH = 220;
   const MAX_WIDTH = 520;
-  const COLLAPSED_WIDTH = 56;
+  const COLLAPSED_WIDTH = 0;
 
   const[sidebarWidth, setSidebarWidth] = useState(320);
   const draggingRef = useRef(false);
