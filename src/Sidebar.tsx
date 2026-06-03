@@ -1,16 +1,18 @@
 type SidebarPanel = {
+    width: number;
     hasPlayingArea: boolean;
     onCreatePlayingArea: () => void;
 };
 
 export default function Sidebar({
+    width,
     hasPlayingArea,
     onCreatePlayingArea,
 }:SidebarPanel) {
     return(
         <aside
             style = {{
-                width: 320,
+                width,
                 padding: 16,
                 borderRight: "1px solid gray",
                 background: "black",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MapView from "./MapView";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
@@ -8,11 +8,46 @@ export default function App() {
   const [scaleUnit, setScaleUnit] = useState<"metric" | "imperial">("imperial");
   const [hasPlayingArea, setHasPlayingArea] = useState(false);
 
+  const[sidebarWidth, setSidebarWidth] = useState(320);
+  const draggingRef = useRef(false);
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) =>{
+      if (!draggingRef.current) return;
+      const  next  = Math.min(520, Math.max(220,e.clientX));
+      setSidebarWidth(next);
+    };
+
+    const onUp = () => {
+      draggingRef.current = false;
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, []);
+
   return (
     <div style={{width:"100vw", height: "100vh", display:"flex"}}>
       <Sidebar
+        width={sidebarWidth}
         hasPlayingArea  ={hasPlayingArea}
         onCreatePlayingArea={() => setHasPlayingArea(true)}
+      />
+
+      <div
+        onPointerDown = {() => {
+          draggingRef.current = true;
+        }}
+        style = {{
+          width: 8,
+          cursor: "col-resize",
+          background: "transparent",
+        }}
       />
 
       <div style  = {{position:"relative",flex:1, height: "100%"}}>
