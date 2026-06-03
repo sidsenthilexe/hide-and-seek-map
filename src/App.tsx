@@ -1,13 +1,21 @@
 import { useState } from "react";
 import MapView from "./MapView";
-import Settings from "./Settings"
+import Settings from "./Settings";
+import Sidebar from "./Sidebar";
 
 export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [scaleUnit, setScaleUnit] = useState<"metric" | "imperial">("imperial");
+  const [hasPlayingArea, setHasPlayingArea] = useState(false);
 
   return (
-    <div style={{width:"100vw", height: "100vh", position: "relative"}}>
+    <div style={{width:"100vw", height: "100vh", display:"flex"}}>
+      <Sidebar
+        hasPlayingArea  ={hasPlayingArea}
+        onCreatePlayingArea={() => setHasPlayingArea(true)}
+      />
+
+      <div style  = {{position:"relative",flex:1, height: "100%"}}>
       <MapView scaleUnit={scaleUnit} />
 
       <button
@@ -31,7 +39,7 @@ export default function App() {
         onChangeScaleUnit={setScaleUnit}
         onClose={() => setIsSettingsOpen(false)}
       />
-
+      </div>
     </div>
   );
 }

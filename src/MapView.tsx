@@ -22,7 +22,7 @@ export default function MapView({scaleUnit}: {scaleUnit: ScaleUnit}) {
         scaleRef.current = new maplibregl.ScaleControl({
             maxWidth: 120,
             unit: scaleUnit
-        })
+        });
         mapRef.current.addControl(scaleRef.current, "bottom-left");
 
         return () => {
@@ -30,7 +30,12 @@ export default function MapView({scaleUnit}: {scaleUnit: ScaleUnit}) {
             mapRef.current = null;
             scaleRef.current = null;
         };
-    }, [scaleUnit]);
+    }, []);
+
+    useEffect(() =>  {
+        if(!scaleRef.current) return;
+        scaleRef.current.setUnit(scaleUnit);
+    }, [scaleUnit])
 
     return <div ref={mapContainerRef} style={{width: "100%", height: "100%"}} />;
 }
