@@ -8,13 +8,22 @@ export default function App() {
   const [scaleUnit, setScaleUnit] = useState<"metric" | "imperial">("imperial");
   const [hasPlayingArea, setHasPlayingArea] = useState(false);
 
+  const MIN_WIDTH = 220;
+  const MAX_WIDTH = 520;
+  const COLLAPSED_WIDTH = 56;
+
   const[sidebarWidth, setSidebarWidth] = useState(320);
   const draggingRef = useRef(false);
 
   useEffect(() => {
     const onMove = (e: PointerEvent) =>{
       if (!draggingRef.current) return;
-      const  next  = Math.min(520, Math.max(220,e.clientX));
+      const raw = e.clientX;
+      if (raw < MIN_WIDTH) {
+        setSidebarWidth(COLLAPSED_WIDTH);
+        return;
+      }
+      const  next  = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH,e.clientX));
       setSidebarWidth(next);
     };
 
