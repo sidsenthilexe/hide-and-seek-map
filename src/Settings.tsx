@@ -15,6 +15,16 @@ export default function Settings({
 
     return (
         <div
+            onClick ={onClose}
+            style = {{
+                position: "fixed",
+                inset: 0,
+                zIndex: 16,
+                background: "transparent"
+            }}
+        >
+        <div
+        onClick={(e)  => e.stopPropagation()}
         style={{
             position: "absolute",
             top: 64,
@@ -51,6 +61,7 @@ export default function Settings({
                 cursor: "pointer",
             }}
         >Close</button>
+    </div>
     </div>
     );
 }

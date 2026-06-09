@@ -43,7 +43,7 @@ export default function App() {
   return (
     <div style={{width:"100vw", height: "100vh", display:"flex"}}>
       <Sidebar
-        width={sidebarWidth}
+        width={240}
         hasPlayingArea  ={hasPlayingArea}
         onCreatePlayingArea={() => setHasPlayingArea(true)}
       />
