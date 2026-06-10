@@ -3,87 +3,65 @@ import MapView from "./MapView";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
 
+type MapPoint = [number, number];
+type PlayingAreaMode ="idle" | "drawing" | "set";
+
 export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [scaleUnit, setScaleUnit] = useState<"metric" | "imperial">("imperial");
-  const [hasPlayingArea, setHasPlayingArea] = useState(false);
 
-  const MIN_WIDTH = 220;
-  const MAX_WIDTH = 520;
-  const COLLAPSED_WIDTH = 0;
+  const [mode, setMode] = useState<PlayingAreaMode>("idle");
+  const [drawingPoints, setDrawingPoints] = useState<MapPoint[]>([]);
+  const [playingArea, setPlayingArea] = useState<GeoJSON.Polygon | null>(null);
 
-  const[sidebarWidth, setSidebarWidth] = useState(320);
-  const draggingRef = useRef(false);
+  const startDrawingArea = () => {
+    setMode("drawing");
+    setDrawingPoints([]);
+    setPlayingArea(null);
+  };
 
-  useEffect(() => {
-    const onMove = (e: PointerEvent) =>{
-      if (!draggingRef.current) return;
-      const raw = e.clientX;
-      if (raw < MIN_WIDTH) {
-        setSidebarWidth(COLLAPSED_WIDTH);
-        return;
-      }
-      const  next  = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH,e.clientX));
-      setSidebarWidth(next);
-    };
+  const cancelDrawingArea = ()=> {
+    setMode("idle");
+    setDrawingPoints([]);
+  }
 
-    const onUp = () => {
-      draggingRef.current = false;
-    };
+  const finishDrawingArea = () => {
+    if (drawingPoints.length < 3) return;
+    const closedShape: MapPoint[] = [...drawingPoints, drawingPoints[0]];
+    setPlayingArea({
+      type: "Polygon",
+      coordinates: [closedShape],
+    });
+    setMode("set");
+  }
 
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-  }, []);
+  const handleMapClick = (point:MapPoint) => {
+    if(mode !== "drawing") return;
+    setDrawingPoints((current) => [...current, point]);
+  };
 
   return (
-    <div style={{width:"100vw", height: "100vh", display:"flex"}}>
+    <div style={{width: "100vw", height: "100vh", display: "flex"}}>
       <Sidebar
-        width={240}
-        hasPlayingArea  ={hasPlayingArea}
-        onCreatePlayingArea={() => setHasPlayingArea(true)}
+        width={320}
+        mode={mode} //todo
+        hasPlayingArea={playingArea !== null}
+        pointsCount={drawingPoints.length}
+        onCreatePlayingArea={startDrawingArea}
+        onFinishPlayingArea={finishDrawingArea}
+        onCancelPlayingArea={cancelDrawingArea}
       />
 
-      <div
-        onPointerDown = {() => {
-          draggingRef.current = true;
-        }}
-        style = {{
-          width: 8,
-          cursor: "col-resize",
-          background: "transparent",
-        }}
-      />
-
-      <div style  = {{position:"relative",flex:1, height: "100%"}}>
-      <MapView scaleUnit={scaleUnit} />
-
-      <button
-        onClick={() => setIsSettingsOpen(true)}
-        style ={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          zIndex: 16,
-          padding: "8px 16px",
-          borderRadius: 8,
-          border: "1px solid #ccc",
-          background: "black",
-          cursor: "pointer",
-        }}
-      >Settings</button>
-
-      <Settings
-        isOpen={isSettingsOpen}
-        scaleUnit={scaleUnit}
-        onChangeScaleUnit={setScaleUnit}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+      <div style={{position: "relative", flex: 1, height: "100%"}}>
+        <MapView
+          scaleUnit={scaleUnit}
+          mode={mode}//todo
+          drawingPoints={drawingPoints}
+          playingArea={playingArea}
+          onMapClick={handleMapClick}
+        />
       </div>
     </div>
-  );
+  )
+
 }
