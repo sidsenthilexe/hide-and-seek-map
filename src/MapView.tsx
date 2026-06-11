@@ -202,6 +202,21 @@ export default function MapView({
         });
         map.addControl(scaleRef.current, "bottom-left");
 
+        if (map.getLayer(LAYER_DRAWING_LINE)) {
+            map.setLayoutProperty(
+                LAYER_DRAWING_LINE,
+                "visibility",
+                mode === "drawing" ? "visible" : "none"
+            );
+        }
+
+        if (map.getLayer(LAYER_DRAWING_POINTS)) {
+            map.setLayoutProperty(
+                LAYER_DRAWING_POINTS,
+                "visibility",
+                mode === "drawing" ? "visible" : "none"
+            );
+        }
 
         return () => {
             map.remove();
