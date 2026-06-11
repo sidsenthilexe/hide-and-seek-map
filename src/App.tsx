@@ -44,7 +44,7 @@ export default function App() {
     <div style={{width: "100vw", height: "100vh", display: "flex"}}>
       <Sidebar
         width={320}
-        mode={mode} //todo
+        mode={mode}
         hasPlayingArea={playingArea !== null}
         pointsCount={drawingPoints.length}
         onCreatePlayingArea={startDrawingArea}
@@ -55,7 +55,7 @@ export default function App() {
       <div style={{position: "relative", flex: 1, height: "100%"}}>
         <MapView
           scaleUnit={scaleUnit}
-          mode={mode}//todo
+          mode={mode}
           drawingPoints={drawingPoints}
           playingArea={playingArea}
           onMapClick={handleMapClick}

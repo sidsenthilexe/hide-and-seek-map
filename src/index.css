@@ -94,3 +94,10 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.maplibregl-ctrl-scale {
+  background: rgba(0, 0, 0, 0.85) !important;
+  color: "white" !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  font-weight: 500;
+}
