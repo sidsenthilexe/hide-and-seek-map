@@ -1,4 +1,4 @@
-type SidebarPanel = {
+type SidebarProps = {
     width: number;
     mode: "idle" | "drawing" |"set";
     hasPlayingArea: boolean;
@@ -16,7 +16,7 @@ export default function Sidebar({
     onCreatePlayingArea,
     onFinishPlayingArea,
     onCancelPlayingArea,
-}: SidebarPanel) {
+}: SidebarProps) {
     const isDrawing = mode === "drawing";
 
     return (
