@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import MapView from "./MapView";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
@@ -20,7 +20,7 @@ export default function App() {
     setPlayingArea(null);
   };
 
-  const cancelDrawingArea = ()=> {
+  const cancelDrawingArea = () => {
     setMode("idle");
     setDrawingPoints([]);
   }
@@ -32,6 +32,7 @@ export default function App() {
       type: "Polygon",
       coordinates: [closedShape],
     });
+    setDrawingPoints([]);
     setMode("set");
   }
 

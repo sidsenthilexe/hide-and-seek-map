@@ -140,14 +140,26 @@ export default function MapView({
 
             if (!map.getLayer(LAYER_PLAYING_FILL)) {
                 map.addLayer({
+                    id: LAYER_PLAYING_FILL,
+                    type: "fill",
+                    source: SOURCE_PLAYING_AREA,
+                    paint: {
+                        "fill-color": "lightblue",
+                        "fill-opacity": 0.2,
+                    },
+                });
+            }
+
+            if (!map.getLayer(LAYER_PLAYING_OUTLINE)) {
+                map.addLayer({
                     id: LAYER_PLAYING_OUTLINE,
                     type: "line",
                     source: SOURCE_PLAYING_AREA,
                     paint: {
                         "line-color": "lightblue",
                         "line-width": 3,
-                    },
-                });
+                    }
+                })
             }
 
             if (!map.getLayer(LAYER_DRAWING_LINE)) {
@@ -190,10 +202,6 @@ export default function MapView({
         });
         map.addControl(scaleRef.current, "bottom-left");
 
-        map.on("click", (event) => {
-            if (mode !== "drawing") return;
-            onMapClick([event.lngLat.lng, event.lngLat.lat])
-        });
 
         return () => {
             map.remove();
@@ -201,6 +209,21 @@ export default function MapView({
             scaleRef.current = null;
         };
     }, []);
+
+     useEffect(() => {
+            if (!mapRef.current) return;
+
+            const map = mapRef.current;
+            const onClick = (event: maplibregl.MapMouseEvent) => {
+                if (mode !== "drawing") return;
+                onMapClick([event.lngLat.lng, event.lngLat.lat]);
+            };
+
+            map.on("click", onClick);
+            return () => {
+                map.off("click", onClick);
+            };
+        }, [mode, onMapClick]);    
 
     useEffect(() => {
         if (!mapRef.current) return;
