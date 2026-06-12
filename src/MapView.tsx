@@ -24,6 +24,7 @@ const LAYER_PLAYING_OUTLINE = "playing-area-outline";
 const LAYER_DRAWING_LINE = "drawing-line-layer";
 const LAYER_DRAWING_POINTS =  "drawing-points-layer";
 const TOLERANCE = 0.001;
+const PX_TOLERANCE = 20;
 
 function lineFromPoints(points: MapPoint[]): GeoJSON.Feature<GeoJSON.LineString> {
     return {
@@ -251,10 +252,17 @@ export default function MapView({
             const feature = event.features?.[0];
             if (!feature || feature.geometry.type !== "Point") return;
 
-            const [lng, lat] = feature.geometry.coordinates as MapPoint;
             const [firstLng, firstLat] = drawingPoints[0];
+            const firstPos = map.project([firstLng, firstLat]);
+            const clickPos = event.point;
 
-            if (lng === firstLng && lat === firstLat) {
+            const dist = Math.sqrt(
+                Math.pow(firstPos.x - clickPos.x, 2) +
+                Math.pow(firstPos.y - clickPos.y, 2)
+            );
+
+
+            if (dist < PX_TOLERANCE) {
                 onFirstPointClick();
             }
         };
