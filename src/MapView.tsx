@@ -12,6 +12,7 @@ type MapViewProps = {
     drawingPoints: MapPoint[];
     playingArea: GeoJSON.Polygon | null;
     onMapClick: (point: MapPoint) => void;
+    onFirstPointClick: () => void;
 }
 
 const SOURCE_PLAYING_AREA = "playing-area";
@@ -22,6 +23,7 @@ const LAYER_PLAYING_FILL = "playing-area-fill";
 const LAYER_PLAYING_OUTLINE = "playing-area-outline";
 const LAYER_DRAWING_LINE = "drawing-line-layer";
 const LAYER_DRAWING_POINTS =  "drawing-points-layer";
+const TOLERANCE = 0.001;
 
 function lineFromPoints(points: MapPoint[]): GeoJSON.Feature<GeoJSON.LineString> {
     return {
@@ -63,6 +65,7 @@ export default function MapView({
     drawingPoints,
     playingArea,
     onMapClick,
+    onFirstPointClick,
 }: MapViewProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const mapRef =useRef<Map | null>(null);
@@ -238,7 +241,29 @@ export default function MapView({
             return () => {
                 map.off("click", onClick);
             };
-        }, [mode, onMapClick]);    
+        }, [mode, onMapClick]);  
+        
+    useEffect(() => {
+        if (!mapRef.current) return;
+        const map = mapRef.current;
+        const onPointClick = (event: maplibregl.MapLayerMouseEvent) => {
+            if (mode !== "drawing" || drawingPoints.length < 3) return;
+            const feature = event.features?.[0];
+            if (!feature || feature.geometry.type !== "Point") return;
+
+            const [lng, lat] = feature.geometry.coordinates as MapPoint;
+            const [firstLng, firstLat] = drawingPoints[0];
+
+            if (lng === firstLng && lat === firstLat) {
+                onFirstPointClick();
+            }
+        };
+
+        map.on("click", LAYER_DRAWING_POINTS, onPointClick);
+        return () => {
+            map.off("click", LAYER_DRAWING_POINTS, onPointClick);
+        };
+    }, [mode, drawingPoints, onFirstPointClick]);
 
     useEffect(() => {
         if (!mapRef.current) return;

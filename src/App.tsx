@@ -41,6 +41,12 @@ export default function App() {
     setDrawingPoints((current) => [...current, point]);
   };
 
+  const handleFirstPointClick = () => {
+    if (drawingPoints.length >= 3) {
+      finishDrawingArea();
+    }
+  }
+
   return (
     <div style={{width: "100vw", height: "100vh", display: "flex"}}>
       <Sidebar
@@ -60,6 +66,7 @@ export default function App() {
           drawingPoints={drawingPoints}
           playingArea={playingArea}
           onMapClick={handleMapClick}
+          onFirstPointClick={handleFirstPointClick}
         />
       </div>
     </div>
