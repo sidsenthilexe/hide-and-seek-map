@@ -2,9 +2,24 @@ import { useState } from "react";
 import MapView from "./MapView";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
+import { unstable_batchedUpdates } from "react-dom";
 
 type MapPoint = [number, number];
 type PlayingAreaMode ="idle" | "drawing" | "set";
+type RadarResult = "in" | "out";
+
+type QuestionFlow =
+  | {kind: "closed"}
+  | {kind: "menu"}
+  | {
+    kind: "radar";
+    draft: {
+      radius: number;
+      result: RadarResult;
+      centerPoint: MapPoint | null;
+      isPickingCenter: boolean;
+    };
+  };
 
 function pointsEqual(a: MapPoint, b: MapPoint) {
   return a[0] === b[0] && a[1] === b[1];
@@ -85,11 +100,13 @@ export default function App() {
   const [mode, setMode] = useState<PlayingAreaMode>("idle");
   const [drawingPoints, setDrawingPoints] = useState<MapPoint[]>([]);
   const [playingArea, setPlayingArea] = useState<GeoJSON.Polygon | null>(null);
+  const [questionFlow, setQuestionFlow] = useState<QuestionFlow>({kind: "closed"});
 
   const startDrawingArea = () => {
     setMode("drawing");
     setDrawingPoints([]);
     setPlayingArea(null);
+    setQuestionFlow({kind: "closed"});
   };
 
   const cancelDrawingArea = () => {
@@ -109,17 +126,95 @@ export default function App() {
     setMode("set");
   }
 
-  const handleMapClick = (point:MapPoint) => {
-    if(mode !== "drawing") return;
-    if (wouldCreateIntersection(drawingPoints, point)) return;
-    setDrawingPoints((current) => [...current, point]);
+  const openQuestionMenu = () => {
+    setQuestionFlow({kind: "menu"});
+  }
+
+  const radarQuestion = () => {
+    setQuestionFlow({
+      kind: "radar",
+      draft: {
+        radius: 1,
+        result: "out",
+        centerPoint: null,
+        isPickingCenter: false,
+      },
+    });
   };
+
+  const updateRadar = (updates: Partial<{
+    radius: number;
+    result: RadarResult;
+    centerPoint: MapPoint | null;
+    isPickingCenter: boolean;
+  }>) => {
+    setQuestionFlow((current) => {
+      if (current.kind !== "radar") return current;
+      return {
+        kind: "radar",
+        draft: {
+          ...current.draft,
+          ...updates,
+        },
+      };
+    });
+  };
+
+  const pickRadarCenter = () => {
+    setQuestionFlow((current) => {
+      if (current.kind !== "radar") return current;
+      return {
+        kind: "radar",
+        draft: {
+          ...current.draft,
+          isPickingCenter: true,
+        },
+      };
+    });
+  };
+
+  const saveRadarQuestion = () => {
+    if (questionFlow.kind !== "radar") return;
+    if(!questionFlow.draft.centerPoint) return;
+    setQuestionFlow({kind: "closed"})
+  };
+
+  const cancelQuestionFlow = () => {
+    setQuestionFlow({kind: "closed"});
+  }
+
+  const handleMapClick = (point:MapPoint) => {
+    if(mode === "drawing") {
+      if (wouldCreateIntersection(drawingPoints, point)) return;
+      setDrawingPoints((current) => [...current, point]);
+      return;
+    }
+  };
+
+  setQuestionFlow((current) => {
+    if (current.kind !== "radar") return current;
+    if (!current.draft.isPickingCenter) return current;
+
+    return {
+      kind: "radar",
+      draft: {
+        ...current.draft,
+        centerPoint: point,
+        isPickingCenter: false,
+      },
+    };
+  });
 
   const handleFirstPointClick = () => {
     if (drawingPoints.length >= 3) {
       finishDrawingArea();
     }
   }
+
+  const mapMode =
+    mode === "drawing" ? "drawing"
+      : questionFlow.kind === "radar" && questionFlow.draft.isPickingCenter ? "picking-radar-center"
+      : "idle";
 
   return (
     <div style={{width: "100vw", height: "100vh", display: "flex"}}>
@@ -131,6 +226,12 @@ export default function App() {
         onCreatePlayingArea={startDrawingArea}
         onFinishPlayingArea={finishDrawingArea}
         onCancelPlayingArea={cancelDrawingArea}
+        onOpenQuestionMenu={openQuestionMenu}
+        onStartRadarQuestion={radarQuestion}
+        onUpdateRadarDraft={updateRadar}
+        onPickRadarCenter={pickRadarCenter}
+        onSaveRadarQuestion={saveRadarQuestion}
+        onCancelQuestionFlow={cancelQuestionFlow}
       />
 
       <div style={{position: "relative", flex: 1, height: "100%"}}>
