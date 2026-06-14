@@ -1,8 +1,11 @@
+import type {MapPoint, PlayingAreaMode, RadarResult, QuestionFlow} from "./Types";
+
 type SidebarProps = {
     width: number;
-    mode: "idle" | "drawing" |"set";
+    mode: PlayingAreaMode;
     hasPlayingArea: boolean;
     pointsCount: number;
+    // questionFlow: QuestionFlow;
     onCreatePlayingArea: () => void;
     onFinishPlayingArea: () => void;
     onCancelPlayingArea: () => void;

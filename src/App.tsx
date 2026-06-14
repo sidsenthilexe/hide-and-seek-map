@@ -2,24 +2,7 @@ import { useState } from "react";
 import MapView from "./MapView";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
-import { unstable_batchedUpdates } from "react-dom";
-
-type MapPoint = [number, number];
-type PlayingAreaMode ="idle" | "drawing" | "set";
-type RadarResult = "in" | "out";
-
-type QuestionFlow =
-  | {kind: "closed"}
-  | {kind: "menu"}
-  | {
-    kind: "radar";
-    draft: {
-      radius: number;
-      result: RadarResult;
-      centerPoint: MapPoint | null;
-      isPickingCenter: boolean;
-    };
-  };
+import type {MapPoint, PlayingAreaMode, RadarResult, QuestionFlow} from "./Types";
 
 function pointsEqual(a: MapPoint, b: MapPoint) {
   return a[0] === b[0] && a[1] === b[1];
@@ -189,7 +172,7 @@ export default function App() {
       setDrawingPoints((current) => [...current, point]);
       return;
     }
-  };
+  
 
   setQuestionFlow((current) => {
     if (current.kind !== "radar") return current;
@@ -204,6 +187,7 @@ export default function App() {
       },
     };
   });
+};
 
   const handleFirstPointClick = () => {
     if (drawingPoints.length >= 3) {
@@ -226,12 +210,12 @@ export default function App() {
         onCreatePlayingArea={startDrawingArea}
         onFinishPlayingArea={finishDrawingArea}
         onCancelPlayingArea={cancelDrawingArea}
-        onOpenQuestionMenu={openQuestionMenu}
-        onStartRadarQuestion={radarQuestion}
-        onUpdateRadarDraft={updateRadar}
-        onPickRadarCenter={pickRadarCenter}
-        onSaveRadarQuestion={saveRadarQuestion}
-        onCancelQuestionFlow={cancelQuestionFlow}
+        // onOpenQuestionMenu={openQuestionMenu}
+        // onStartRadarQuestion={radarQuestion}
+        // onUpdateRadarDraft={updateRadar}
+        // onPickRadarCenter={pickRadarCenter}
+        // onSaveRadarQuestion={saveRadarQuestion}
+        // onCancelQuestionFlow={cancelQuestionFlow}
       />
 
       <div style={{position: "relative", flex: 1, height: "100%"}}>
