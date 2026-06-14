@@ -142,6 +142,32 @@ export default function App() {
           onMapClick={handleMapClick}
           onFirstPointClick={handleFirstPointClick}
         />
+
+      <button
+        onClick={() => setIsSettingsOpen(true)}
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+          zIndex: 16,
+          padding: "8px 16px",
+          borderRadius: 8,
+          border: "1px solid lightgray",
+          background: "black",
+          color: "white",
+          cursor: "pointer",
+        }}
+      >
+        Settings
+      </button>
+      
+      <Settings
+        isOpen={isSettingsOpen}
+        scaleUnit={scaleUnit}
+        onChangeScaleUnit={setScaleUnit}
+        onClose={() => setIsSettingsOpen(false)}
+      />
+
       </div>
     </div>
   )
