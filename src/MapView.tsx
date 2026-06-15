@@ -2,15 +2,16 @@ import { useEffect, useMemo, useRef } from "react";
 import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-type ScaleUnit = "metric" | "imperial";
-type MapMode = "idle" | "drawing" | "set";
-type MapPoint = [number, number];
+import type {MapInteractionMode, MapPoint, RadarQuestion} from "./Types";
+import { circle as turfCircle } from "@turf/turf";
+
 
 type MapViewProps = {
-    scaleUnit: ScaleUnit;
-    mode: MapMode;
+    scaleUnit: "metric" | "imperial";
+    mode: MapInteractionMode;
     drawingPoints: MapPoint[];
     playingArea: GeoJSON.Polygon | null;
+    radarQuestions: RadarQuestion[];
     onMapClick: (point: MapPoint) => void;
     onFirstPointClick: () => void;
 }
@@ -23,8 +24,15 @@ const LAYER_PLAYING_FILL = "playing-area-fill";
 const LAYER_PLAYING_OUTLINE = "playing-area-outline";
 const LAYER_DRAWING_LINE = "drawing-line-layer";
 const LAYER_DRAWING_POINTS =  "drawing-points-layer";
-const TOLERANCE = 0.001;
 const PX_TOLERANCE = 20;
+
+const SOURCE_RADAR_CENTERS = "radar-centers";
+const SOURCE_RADAR_AREAS = "radar-areas";
+const LAYER_RADAR_FILL = "radar-areas-fill";
+const LAYER_RADAR_OUTLINE = "radar-areas-outline";
+const LAYER_RADAR_CENTERS = "radar-centers-layer";
+
+
 
 function lineFromPoints(points: MapPoint[]): GeoJSON.Feature<GeoJSON.LineString> {
     return {

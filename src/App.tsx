@@ -2,7 +2,7 @@ import { useState } from "react";
 import MapView from "./MapView";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
-import type {MapPoint, PlayingAreaMode, RadarResult, QuestionFlow} from "./Types";
+import type {MapInteractionMode, MapPoint, PlayingAreaMode, RadarQuestion, RadarResult, QuestionFlow} from "./Types";
 
 function pointsEqual(a: MapPoint, b: MapPoint) {
   return a[0] === b[0] && a[1] === b[1];
@@ -84,17 +84,20 @@ export default function App() {
   const [drawingPoints, setDrawingPoints] = useState<MapPoint[]>([]);
   const [playingArea, setPlayingArea] = useState<GeoJSON.Polygon | null>(null);
   const [questionFlow, setQuestionFlow] = useState<QuestionFlow>({kind: "closed"});
+  const [radarQuestions, setRadarQuestions] = useState<RadarQuestion[]>([]);
 
   const startDrawingArea = () => {
     setMode("drawing");
     setDrawingPoints([]);
     setPlayingArea(null);
+    setRadarQuestions([]);
     setQuestionFlow({kind: "closed"});
   };
 
   const cancelDrawingArea = () => {
     setMode("idle");
     setDrawingPoints([]);
+    setQuestionFlow({kind: "closed"})
   }
 
   const finishDrawingArea = () => {
@@ -117,7 +120,7 @@ export default function App() {
     setQuestionFlow({
       kind: "radar",
       draft: {
-        radius: 1,
+        radiusKm: 1,
         result: "out",
         centerPoint: null,
         isPickingCenter: false,
@@ -126,7 +129,7 @@ export default function App() {
   };
 
   const updateRadar = (updates: Partial<{
-    radius: number;
+    radiusKm: number;
     result: RadarResult;
     centerPoint: MapPoint | null;
     isPickingCenter: boolean;
@@ -158,8 +161,18 @@ export default function App() {
 
   const saveRadarQuestion = () => {
     if (questionFlow.kind !== "radar") return;
-    if(!questionFlow.draft.centerPoint) return;
-    setQuestionFlow({kind: "closed"})
+    const centerPoint = questionFlow.draft.centerPoint;
+    if (!centerPoint) return;
+    setRadarQuestions((current) => [
+      ...current,
+      {
+        id: String(Date.now()) + String(Math.random()),
+        centerPoint,
+        radiusKm: questionFlow.draft.radiusKm,
+        result: questionFlow.draft.result,
+      },
+    ]);
+    setQuestionFlow({kind: "closed"});
   };
 
   const cancelQuestionFlow = () => {
@@ -167,26 +180,26 @@ export default function App() {
   }
 
   const handleMapClick = (point:MapPoint) => {
-    if(mode === "drawing") {
+    if (mapMode === "drawing") {
       if (wouldCreateIntersection(drawingPoints, point)) return;
       setDrawingPoints((current) => [...current, point]);
       return;
     }
-  
 
-  setQuestionFlow((current) => {
-    if (current.kind !== "radar") return current;
-    if (!current.draft.isPickingCenter) return current;
+    setQuestionFlow((current) => {
+      if (current.kind !== "radar") return current;
+      if (!current.draft.isPickingCenter) return current;
 
-    return {
-      kind: "radar",
-      draft: {
-        ...current.draft,
-        centerPoint: point,
-        isPickingCenter: false,
-      },
-    };
-  });
+      return {
+        kind: "radar",
+        draft: {
+          ...current.draft,
+          centerPoint: point,
+          isPickingCenter: false
+        },
+      };
+    });
+ 
 };
 
   const handleFirstPointClick = () => {
@@ -195,9 +208,9 @@ export default function App() {
     }
   }
 
-  const mapMode =
+  const mapMode: MapInteractionMode =
     mode === "drawing" ? "drawing"
-      : questionFlow.kind === "radar" && questionFlow.draft.isPickingCenter ? "picking-radar-center"
+      : questionFlow.kind === "radar" && questionFlow.draft.isPickingCenter ? "radar-picking-center"
       : "idle";
 
   return (
@@ -207,23 +220,25 @@ export default function App() {
         mode={mode}
         hasPlayingArea={playingArea !== null}
         pointsCount={drawingPoints.length}
+        questionFlow={questionFlow}
         onCreatePlayingArea={startDrawingArea}
         onFinishPlayingArea={finishDrawingArea}
         onCancelPlayingArea={cancelDrawingArea}
-        // onOpenQuestionMenu={openQuestionMenu}
-        // onStartRadarQuestion={radarQuestion}
-        // onUpdateRadarDraft={updateRadar}
-        // onPickRadarCenter={pickRadarCenter}
-        // onSaveRadarQuestion={saveRadarQuestion}
-        // onCancelQuestionFlow={cancelQuestionFlow}
+        onOpenQuestionMenu={openQuestionMenu}
+        onStartRadarQuestion={radarQuestion}
+        onUpdateRadarDraft={updateRadar}
+        onPickRadarCenter={pickRadarCenter}
+        onSaveRadarQuestion={saveRadarQuestion}
+        onCancelQuestionFlow={cancelQuestionFlow}
       />
 
       <div style={{position: "relative", flex: 1, height: "100%"}}>
         <MapView
           scaleUnit={scaleUnit}
-          mode={mode}
+          mode={mapMode}
           drawingPoints={drawingPoints}
           playingArea={playingArea}
+          radarQuestions={radarQuestions}
           onMapClick={handleMapClick}
           onFirstPointClick={handleFirstPointClick}
         />
