@@ -147,7 +147,7 @@ export default function Sidebar({
                                 >
                                     <p style={{margin: 0, marginBottom: 4}}>Radar {index + 1}</p>
                                     <p style={{margin: 0, marginBottom: 4}}>
-                                        Radius: {scaleUnit==="metric" ? `${question.radiusKm.toFixed(2)} km` : `${(question.radiusKm / 1,609344).toFixed(2)} mi`}
+                                        Radius: {scaleUnit==="metric" ? `${question.radiusKm.toFixed(2)} km` : `${(question.radiusKm / 1.609344).toFixed(2)} mi`}
                                     </p>
                                     <p style={{margin: 0, marginBottom: 4}}>Result: {question.result === "in"?"Inside" : "Outside"}</p>
                                     <button
@@ -249,7 +249,7 @@ export default function Sidebar({
 
            {hasPlayingArea && mode === "set" && questionFlow.kind === "menu" ? (
             <>
-                <p style={{marginBottom: 16}}>Choose a questionitype:</p>
+                <p style={{marginBottom: 16}}>Choose a question type:</p>
                 <div style={{display:"flex", gap:8}}>
                     <button
                         onClick={onStartRadarQuestion}
