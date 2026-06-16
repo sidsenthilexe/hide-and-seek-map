@@ -116,24 +116,70 @@ export default function App() {
     setQuestionFlow({kind: "menu"});
   }
 
+  function formatRadarRadiusText(radiusKm: number, scaleUnit: "metric" | "imperial") {
+    const radiusValue = scaleUnit === "imperial" ? radiusKm/1.609344 : radiusKm;
+    return String(Number(radiusValue.toFixed(2)));
+  }
+
   const radarQuestion = () => {
     setQuestionFlow({
       kind: "radar",
       draft: {
-        radiusKm: 1,
+        radiusText: "1",
         result: "out",
         centerPoint: null,
         isPickingCenter: false,
+        editingRadarId: null,
+      },
+    });
+  };
+
+  const editRadarQuestion = (radarQuestionId: string) => {
+    const radarQuestion = radarQuestions.find((question) => question.id === radarQuestionId);
+    if (!radarQuestion) return;
+
+    setQuestionFlow({
+      kind: "radar",
+      draft: {
+        radiusText: formatRadarRadiusText(radarQuestion.radiusKm, scaleUnit),
+        result: radarQuestion.result,
+        centerPoint: radarQuestion.centerPoint,
+        isPickingCenter: false,
+        editingRadarId: radarQuestion.id,
       },
     });
   };
 
   const updateRadar = (updates: Partial<{
-    radiusKm: number;
+    radiusText: string;
     result: RadarResult;
     centerPoint: MapPoint | null;
     isPickingCenter: boolean;
   }>) => {
+    if (
+      questionFlow.kind == "radar" && questionFlow.draft.editingRadarId &&
+      (updates.radiusText !== undefined || updates.result !== undefined)
+    ) {
+      const nextRadiusText = updates.radiusText ?? questionFlow.draft.radiusText;
+      const nextResult = updates.result ?? questionFlow.draft.result;
+      const radiusValue = Number(nextRadiusText);
+
+      if (Number.isFinite(radiusValue) && radiusValue > 0) {
+        const radiusKm  = scaleUnit==="imperial" ? radiusValue *1.60934 : radiusValue;
+        setRadarQuestions((current) =>
+          current.map((question) =>
+            question.id === questionFlow.draft.editingRadarId
+            ? {
+              ...question,
+              radiusKm,
+              result: nextResult,
+            }
+            : question
+          )
+        );
+      }
+    }
+
     setQuestionFlow((current) => {
       if (current.kind !== "radar") return current;
       return {
@@ -144,7 +190,31 @@ export default function App() {
         },
       };
     });
+
   };
+
+  const  commitRadarQuestion = (centerPoint:  MapPoint) => {
+    if (questionFlow.kind !== "radar") return;
+
+    const radiusValue = Number(questionFlow.draft.radiusText);
+    if (!Number.isFinite(radiusValue) || radiusValue <= 0) return;
+
+    const radiusKm = scaleUnit==="imperial"? radiusValue * 1.609344 : radiusValue;
+    const nextQuestion: RadarQuestion = {
+      id: questionFlow.draft.editingRadarId ?? String(Date.now()) + String(Math.random()),
+      centerPoint,
+      radiusKm,
+      result: questionFlow.draft.result,
+    };
+
+    setRadarQuestions((current) => questionFlow.draft.editingRadarId
+      ? current.map((question) => question.id === questionFlow.draft.editingRadarId ? nextQuestion: question)
+      : [...current, nextQuestion]);
+
+    setQuestionFlow({kind: "closed"});
+  }
+
+  
 
   const pickRadarCenter = () => {
     setQuestionFlow((current) => {
@@ -163,12 +233,16 @@ export default function App() {
     if (questionFlow.kind !== "radar") return;
     const centerPoint = questionFlow.draft.centerPoint;
     if (!centerPoint) return;
+
+    const radiusValue = Number(questionFlow.draft.radiusText);
+    if (!Number.isFinite(radiusValue) || radiusValue <= 0) return;
+    const radiusKm = scaleUnit==="imperial" ? radiusValue * 1.609344 : radiusValue;
     setRadarQuestions((current) => [
       ...current,
       {
         id: String(Date.now()) + String(Math.random()),
         centerPoint,
-        radiusKm: questionFlow.draft.radiusKm,
+        radiusKm: radiusKm,
         result: questionFlow.draft.result,
       },
     ]);
@@ -186,20 +260,9 @@ export default function App() {
       return;
     }
 
-    setQuestionFlow((current) => {
-      if (current.kind !== "radar") return current;
-      if (!current.draft.isPickingCenter) return current;
-
-      return {
-        kind: "radar",
-        draft: {
-          ...current.draft,
-          centerPoint: point,
-          isPickingCenter: false
-        },
-      };
-    });
- 
+    if (mapMode === "radar-picking-center") {
+      commitRadarQuestion(point);
+    }
 };
 
   const handleFirstPointClick = () => {
@@ -221,14 +284,16 @@ export default function App() {
         hasPlayingArea={playingArea !== null}
         pointsCount={drawingPoints.length}
         questionFlow={questionFlow}
+        scaleUnit = {scaleUnit}
+        radarQuestions = {radarQuestions}
         onCreatePlayingArea={startDrawingArea}
         onFinishPlayingArea={finishDrawingArea}
         onCancelPlayingArea={cancelDrawingArea}
         onOpenQuestionMenu={openQuestionMenu}
         onStartRadarQuestion={radarQuestion}
+        onEditRadarQuestion={editRadarQuestion}
         onUpdateRadarDraft={updateRadar}
         onPickRadarCenter={pickRadarCenter}
-        onSaveRadarQuestion={saveRadarQuestion}
         onCancelQuestionFlow={cancelQuestionFlow}
       />
 

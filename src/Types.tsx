@@ -17,9 +17,10 @@ export type QuestionFlow =
     | {
         kind: "radar";
         draft: {
-            radiusKm: number;
+            radiusText: string;
             result: RadarResult;
             centerPoint: MapPoint | null;
             isPickingCenter: boolean;
+            editingRadarId: string | null;
         };
     };
