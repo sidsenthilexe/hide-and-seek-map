@@ -4,10 +4,10 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import type {MapInteractionMode, MapPoint, RadarQuestion} from "./Types";
 import { circle as turfCircle } from "@turf/turf";
-
+type ScaleUnit = "metric" | "imperial";
 
 type MapViewProps = {
-    scaleUnit: "metric" | "imperial";
+    scaleUnit: ScaleUnit;
     mode: MapInteractionMode;
     drawingPoints: MapPoint[];
     playingArea: GeoJSON.Polygon | null;
@@ -32,7 +32,40 @@ const LAYER_RADAR_FILL = "radar-areas-fill";
 const LAYER_RADAR_OUTLINE = "radar-areas-outline";
 const LAYER_RADAR_CENTERS = "radar-centers-layer";
 
+function collectionFromRadarCenters(radarQuestions: RadarQuestion[]) : GeoJSON.FeatureCollection<GeoJSON.Point> {
+    return {
+        type: "FeatureCollection",
+        features: radarQuestions.map((question) => ({
+            type: "Feature",
+            properties: {
+                result: question.result,
+            },
+            geometry: {
+                type: "Point",
+                coordinates: question.centerPoint,
+            },
+        })),
+    };
+}
 
+function collectionFromRadarAreas(radarQuestions: RadarQuestion[]) : GeoJSON.FeatureCollection<GeoJSON.Polygon> {
+    return {
+        type: "FeatureCollection",
+        features: radarQuestions.map((question) => {
+            const area = turfCircle(question.centerPoint, question.radiusKm, {
+                steps: 64,
+                units: "kilometers",
+            });
+            return {
+                type: "Feature",
+                properties: {
+                    result: question.result,
+                },
+                geometry: area.geometry,
+            };
+        }),
+    };
+}
 
 function lineFromPoints(points: MapPoint[]): GeoJSON.Feature<GeoJSON.LineString> {
     return {
@@ -73,6 +106,7 @@ export default function MapView({
     mode,
     drawingPoints,
     playingArea,
+    radarQuestions,
     onMapClick,
     onFirstPointClick,
 }: MapViewProps) {
@@ -92,6 +126,10 @@ export default function MapView({
     }, [drawingPoints]);
 
     const playingAreaFeature =  useMemo(() => featureFromPolygon(playingArea), [playingArea]);
+
+    const radarCentersData = useMemo(() => collectionFromRadarCenters(radarQuestions), [radarQuestions]);
+
+    const radarAreasData = useMemo(() => collectionFromRadarAreas(radarQuestions), [radarQuestions]);
 
     useEffect(() => {
         if (!mapContainerRef.current || mapRef.current) return;
@@ -150,6 +188,20 @@ export default function MapView({
                 });
             }
 
+            if (!map.getSource(SOURCE_RADAR_AREAS)) {
+                map.addSource(SOURCE_RADAR_AREAS, {
+                    type: "geojson",
+                    data: radarAreasData,
+                });
+            }
+
+            if (!map.getSource(SOURCE_RADAR_CENTERS)) {
+                map.addSource(SOURCE_RADAR_CENTERS, {
+                    type: "geojson",
+                    data: radarCentersData,
+                })
+            }
+
             if (!map.getLayer(LAYER_PLAYING_FILL)) {
                 map.addLayer({
                     id: LAYER_PLAYING_FILL,
@@ -200,6 +252,44 @@ export default function MapView({
                     },
                 });
             }
+
+            if (!map.getLayer(LAYER_RADAR_FILL)) {
+                map.addLayer({
+                    id: LAYER_RADAR_FILL,
+                    type: "fill",
+                    source: SOURCE_RADAR_AREAS,
+                    paint: {
+                        "fill-color" : ["match", ["get", "result"], "in", "#2ecc71", "out", "#e74c3c", "#95a5a6"],
+                        "fill-opacity" : 0.16,
+                    },
+                });
+            }
+
+            if (!map.getLayer(LAYER_RADAR_OUTLINE)) {
+                map.addLayer({
+                    id: LAYER_RADAR_OUTLINE,
+                    type: "line",
+                    source: SOURCE_RADAR_AREAS,
+                    paint: {
+                        "line-color": ["match", ["get", "result"], "in", "#2ecc71", "out", "#e74c3c", "#95a5a6"],
+                        "line-width": 2,
+                    },
+                });
+            }
+
+            if (!map.getLayer(LAYER_RADAR_CENTERS)) {
+                map.addLayer({
+                    id: LAYER_RADAR_CENTERS,
+                    type: "circle",
+                    source: SOURCE_RADAR_CENTERS,
+                    paint: {
+                        "circle-radius": 6,
+                        "circle-color": ["match", ["get", "result"], "in", "#2ecc71", "out", "#e74c3c", "#95a5a6"],
+                        "circle-stroke-width": 2,
+                        "circle-stroke-color": "black",
+                    },
+                });
+            }
         };
 
         if(map.isStyleLoaded()) {
@@ -214,47 +304,39 @@ export default function MapView({
         });
         map.addControl(scaleRef.current, "bottom-left");
 
-        if (map.getLayer(LAYER_DRAWING_LINE)) {
-            map.setLayoutProperty(
-                LAYER_DRAWING_LINE,
-                "visibility",
-                mode === "drawing" ? "visible" : "none"
-            );
-        }
-
-        if (map.getLayer(LAYER_DRAWING_POINTS)) {
-            map.setLayoutProperty(
-                LAYER_DRAWING_POINTS,
-                "visibility",
-                mode === "drawing" ? "visible" : "none"
-            );
-        }
-
         return () => {
             map.remove();
             mapRef.current = null;
             scaleRef.current = null;
         };
-    }, []);
+    }, [protomapsKey]);
+     
+    useEffect(() => {
+        if (!mapRef.current) return;
 
-     useEffect(() => {
-            if (!mapRef.current) return;
+        const map = mapRef.current;
+        const onClick = (event: maplibregl.MapMouseEvent) => {
+            if (mode !== "drawing" && mode !== "radar-picking-center") return;
+            if (mode === "drawing") {
+                const clickedPoints = map.queryRenderedFeatures(event.point, {
+                    layers: [LAYER_DRAWING_POINTS],
+                });
+                if (clickedPoints.length > 0) return;
+            }
 
-            const map = mapRef.current;
-            const onClick = (event: maplibregl.MapMouseEvent) => {
-                if (mode !== "drawing") return;
-                onMapClick([event.lngLat.lng, event.lngLat.lat]);
-            };
+            onMapClick([event.lngLat.lng, event.lngLat.lat]);
+        };
 
-            map.on("click", onClick);
-            return () => {
-                map.off("click", onClick);
-            };
-        }, [mode, onMapClick]);  
-        
+        map.on("click", onClick);
+        return () => {
+            map.off("click", onClick);
+        };
+    }, [mode, onMapClick]);
+
     useEffect(() => {
         if (!mapRef.current) return;
         const map = mapRef.current;
+
         const onPointClick = (event: maplibregl.MapLayerMouseEvent) => {
             if (mode !== "drawing" || drawingPoints.length < 3) return;
             const feature = event.features?.[0];
@@ -264,15 +346,9 @@ export default function MapView({
             const firstPos = map.project([firstLng, firstLat]);
             const clickPos = event.point;
 
-            const dist = Math.sqrt(
-                Math.pow(firstPos.x - clickPos.x, 2) +
-                Math.pow(firstPos.y - clickPos.y, 2)
-            );
+            const dist = Math.sqrt(Math.pow(firstPos.x-clickPos.x, 2) + Math.pow(firstPos.y-clickPos.y, 2));
 
-
-            if (dist < PX_TOLERANCE) {
-                onFirstPointClick();
-            }
+            if (dist < PX_TOLERANCE) { onFirstPointClick(); }
         };
 
         map.on("click", LAYER_DRAWING_POINTS, onPointClick);
@@ -289,42 +365,45 @@ export default function MapView({
     }, [scaleUnit]);
 
     useEffect(() => {
-        if (!mapRef.current ||  !mapRef.current.isStyleLoaded())  return;
+        if (!mapRef.current || !mapRef.current.isStyleLoaded()) return;
         const map = mapRef.current;
 
-        if (mode === "drawing") {
-            map.getCanvas().style.cursor= "crosshair";
+        if (mode === "drawing" || mode === "radar-picking-center") {
+            map.getCanvas().style.cursor = "crosshair";
         } else {
-            map.getCanvas().style.cursor= "";
+            map.getCanvas().style.cursor = "";
         }
 
         const playingAreaSource = map.getSource(SOURCE_PLAYING_AREA) as maplibregl.GeoJSONSource | undefined;
         const drawingLineSource = map.getSource(SOURCE_DRAWING_LINE) as maplibregl.GeoJSONSource | undefined;
         const drawingPointsSource = map.getSource(SOURCE_DRAWING_POINTS) as maplibregl.GeoJSONSource | undefined;
+        const radarAreasSource = map.getSource(SOURCE_RADAR_AREAS) as maplibregl.GeoJSONSource | undefined;
+        const radarCentersSource = map.getSource(SOURCE_RADAR_CENTERS) as maplibregl.GeoJSONSource | undefined;
 
         if (playingAreaSource) {
             playingAreaSource.setData(
-                playingAreaFeature  ??
-                    ({
+                playingAreaFeature ?? (
+                    {
                         type: "Feature",
                         properties: {},
-                        geometry:{
+                        geometry: {
                             type: "Polygon",
-                            coordinates:[[[0,0]]],
+                            coordinates: [[[0, 0]]],
                         },
                     } as GeoJSON.Feature<GeoJSON.Polygon>)
+                    
             );
         }
 
         if (drawingLineSource) {
             drawingLineSource.setData(
-                drawingLineData ??
-                    ({
+                drawingLineData ?? (
+                    {
                         type: "Feature",
                         properties: {},
                         geometry: {
                             type: "LineString",
-                            coordinates: [[0,0], [0,0]],
+                            coordinates: [[0, 0], [0, 0]],
                         },
                     } as GeoJSON.Feature<GeoJSON.LineString>)
             );
@@ -332,15 +411,38 @@ export default function MapView({
 
         if (drawingPointsSource) {
             drawingPointsSource.setData(
-                drawingPointData ??
-                    ({
+                drawingPointData ?? (
+                    {
                         type: "FeatureCollection",
                         features: [],
                     } as GeoJSON.FeatureCollection<GeoJSON.Point>)
             );
         }
 
-    }, [mode, drawingPoints, playingAreaFeature, drawingLineData, drawingPointData]);
+        if (radarAreasSource) {
+            radarAreasSource.setData(radarAreasData);
+        }
 
-    return  <div ref={mapContainerRef} style={{width: "100%", height: "100%"}} />
+        if (radarCentersSource) {
+            radarCentersSource.setData(radarCentersData);
+        }
+
+        if (map.getLayer(LAYER_DRAWING_LINE)) {
+            map.setLayoutProperty(
+                LAYER_DRAWING_LINE,
+                "visibility", mode === "drawing" ? "visible" : "none"
+            );
+        }
+
+        if (map.getLayer(LAYER_DRAWING_POINTS)) {
+            map.setLayoutProperty(
+                LAYER_DRAWING_POINTS,
+                "visibility", mode === "drawing" ? "visible" : "none"
+            );
+        }
+
+    }, [mode, drawingPoints, playingAreaFeature, drawingLineData, drawingPointData, radarAreasData, radarCentersData,]);
+
+    return <div ref={mapContainerRef} style={{width: "100%", height: "100%"}} />
+
 }
