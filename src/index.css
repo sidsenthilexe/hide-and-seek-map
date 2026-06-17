@@ -124,3 +124,7 @@ code {
 .sidebar-button:active {
   background-color: darkgray;
 }
+
+.sidebar-button-padded{
+  padding: 12px 16px;
+}

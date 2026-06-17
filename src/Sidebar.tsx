@@ -65,8 +65,7 @@ export default function Sidebar({
                 <p style={{marginBottom: 16}}>No playing area set yet</p>
                 <button
                     onClick={onCreatePlayingArea}
-                    className="sidebar-button"
-                    style={{padding: "12px 16px"}}
+                    className="sidebar-button sidebar-button-padded"
                 >
                     Set playing area
                 </button>
@@ -83,16 +82,14 @@ export default function Sidebar({
                     <button
                         onClick={onFinishPlayingArea}
                         disabled={pointsCount < 3}
-                        className="sidebar-button"
-                        style={{padding: "12px 16px"}}
+                        className="sidebar-button  sidebar-button-padded"
                     >
                         Finish area
                     </button>
 
                     <button
                         onClick={onCancelPlayingArea}
-                        className = "sidebar-button"
-                        style={{padding: "12px 16px"}}
+                        className = "sidebar-button sidebar-button-padded"
                     >
                         Cancel
                     </button>
@@ -105,8 +102,7 @@ export default function Sidebar({
                 <p style={{marginBottom: 16}}>Playing area set.</p>
                 <button
                     onClick={onOpenQuestionMenu}
-                    className="sidebar-button"
-                    style={{padding: "12px 16px"}}
+                    className="sidebar-button sidebar-button-padded"
                 >
                     Ask question
                 </button>
@@ -211,8 +207,7 @@ export default function Sidebar({
                 <div style={{display:"flex", gap:8}}>
                     <button
                         onClick={onStartRadarQuestion}
-                        className = "sidebar-button"
-                        style= {{padding: "12px 16px"}}
+                        className = "sidebar-button sidebar-button-padded"
                     >Radar</button>
 
                     <button
