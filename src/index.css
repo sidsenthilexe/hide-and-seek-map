@@ -101,3 +101,26 @@ code {
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   font-weight: 500;
 }
+
+.sidebar-button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid gray;
+  background-color: black;
+  color: white;
+  cursor: pointer;
+}
+
+.sidebar-button:hover:not(:disabled) {
+  background-color: #222;
+}
+
+.sidebar-button:disabled {
+  background-color: darkgray;
+  color: lightgray;
+  cursor: not-allowed;
+}
+
+.sidebar-button:active {
+  background-color: darkgray;
+}

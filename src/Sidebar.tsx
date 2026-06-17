@@ -65,14 +65,8 @@ export default function Sidebar({
                 <p style={{marginBottom: 16}}>No playing area set yet</p>
                 <button
                     onClick={onCreatePlayingArea}
-                    style={{
-                        padding: "12px 16px",
-                        borderRadius: 8,
-                        border: "1px solid gray",
-                        background: "black",
-                        color: "white",
-                        cursor: "pointer",
-                    }}
+                    className="sidebar-button"
+                    
                 >
                     Set playing area
                 </button>
@@ -89,28 +83,16 @@ export default function Sidebar({
                     <button
                         onClick={onFinishPlayingArea}
                         disabled={pointsCount < 3}
-                        style={{
-                            padding: "12px 16px",
-                            borderRadius: 8,
-                            border: "1px solid gray",
-                            background: pointsCount < 3 ? "darkgray" : "black",
-                            color: pointsCount <  3 ? "lightgray" : "white",
-                            cursor: pointsCount < 3 ? "not-allowed": "pointer",
-                        }}
+                        className="sidebar-button"
+
                     >
                         Finish area
                     </button>
 
                     <button
                         onClick={onCancelPlayingArea}
-                        style={{
-                            padding: "12px 16px",
-                            borderRadius: 8,
-                            border: "1px solid gray",
-                            background: "black",
-                            color: "white",
-                            cursor: "pointer",
-                        }}
+                        className = "sidebar-button"
+
                     >
                         Cancel
                     </button>
@@ -123,14 +105,8 @@ export default function Sidebar({
                 <p style={{marginBottom: 16}}>Playing area set.</p>
                 <button
                     onClick={onOpenQuestionMenu}
-                    style={{
-                        padding: "12px 16px",
-                        borderRadius: 8,
-                        border: "1px solid gray",
-                        background: "black",
-                        color: "white",
-                        cursor: "pointer",
-                    }}
+                    className="sidebar-button"
+
                 >
                     Ask question
                 </button>
@@ -155,14 +131,7 @@ export default function Sidebar({
                                     <p style={{margin: 0, marginBottom: 4}}>Result: {question.result === "in"?"Inside" : "Outside"}</p>
                                     <button
                                         onClick={() => onEditRadarQuestion(question.id)}
-                                        style={{
-                                            padding: "8px 12px",
-                                            borderRadius: 8,
-                                            border: "1px solid gray",
-                                            background: "black",
-                                            color: "white",
-                                            cursor: "pointer",
-                                        }}
+                                        className="sidebar-button"
                                     >Edit</button>
                                 </div>
                             ))}
@@ -219,14 +188,7 @@ export default function Sidebar({
                 <div style={{display: "flex", gap: 8, marginBottom: 8}}>
                     <button
                         onClick={onPickRadarCenter}
-                        style={{
-                            padding: "8px 12px",
-                            borderRadius: 8,
-                            border: "1px solid gray",
-                            background: questionFlow.draft.isPickingCenter ? "darkgray" : "black",
-                            color: "white",
-                            cursor: "pointer",
-                        }}
+                        className = {`sidebar-button ${questionFlow.draft.isPickingCenter}`}
                     >
                         {questionFlow.draft.isPickingCenter ? "Click map to save" : "Pick center"}
                     </button>
@@ -238,14 +200,7 @@ export default function Sidebar({
 
                 <button
                     onClick={onCancelQuestionFlow}
-                    style={{
-                        padding: "8px 12px",
-                        borderRadius: 8,
-                        border: "1px solid gray",
-                        background: "black",
-                        color: "white",
-                        cursor: "pointer",
-                    }}
+                    className = "sidebar-button"
                 >Cancel</button>
             </>
            ) : null}
@@ -256,26 +211,13 @@ export default function Sidebar({
                 <div style={{display:"flex", gap:8}}>
                     <button
                         onClick={onStartRadarQuestion}
-                        style={{
-                            padding: "12px 16px",
-                            borderRadius: 8,
-                            border: "1px solid gray",
-                            background: "black",
-                            color: "white",
-                            cursor: "pointer",
-                        }}
+                        className = "sidebar-button"
+
                     >Radar</button>
 
                     <button
                         onClick={onCancelQuestionFlow}
-                        style={{
-                            padding: "12px 16px",
-                            borderRadius: 8,
-                            border: "1px solid gray",
-                            background: "black",
-                            color: "white",
-                            cursor: "pointer",
-                        }}
+                        className = "sidebar-button"
                     >Cancel</button>
                 </div>
             </>
