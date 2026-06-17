@@ -66,7 +66,7 @@ export default function Sidebar({
                 <button
                     onClick={onCreatePlayingArea}
                     className="sidebar-button"
-                    
+                    style={{padding: "12px 16px"}}
                 >
                     Set playing area
                 </button>
@@ -84,7 +84,7 @@ export default function Sidebar({
                         onClick={onFinishPlayingArea}
                         disabled={pointsCount < 3}
                         className="sidebar-button"
-
+                        style={{padding: "12px 16px"}}
                     >
                         Finish area
                     </button>
@@ -92,7 +92,7 @@ export default function Sidebar({
                     <button
                         onClick={onCancelPlayingArea}
                         className = "sidebar-button"
-
+                        style={{padding: "12px 16px"}}
                     >
                         Cancel
                     </button>
@@ -106,7 +106,7 @@ export default function Sidebar({
                 <button
                     onClick={onOpenQuestionMenu}
                     className="sidebar-button"
-
+                    style={{padding: "12px 16px"}}
                 >
                     Ask question
                 </button>
@@ -212,7 +212,7 @@ export default function Sidebar({
                     <button
                         onClick={onStartRadarQuestion}
                         className = "sidebar-button"
-
+                        style= {{padding: "12px 16px"}}
                     >Radar</button>
 
                     <button
