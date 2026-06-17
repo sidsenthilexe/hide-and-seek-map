@@ -53,7 +53,9 @@ export default function Sidebar({
                 background: "black",
                 color: "white",
                 boxSizing: "border-box",
-                flexShrink: 0
+                flexShrink: 0,
+                height: "100vh",
+                overflowY: "auto",
             }}
         >
             <h2 style={{marginTop:0}}>Game</h2>
