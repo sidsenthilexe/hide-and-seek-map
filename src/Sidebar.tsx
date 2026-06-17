@@ -127,6 +127,7 @@ export default function Sidebar({
                         padding: "12px 16px",
                         borderRadius: 8,
                         border: "1px solid gray",
+                        background: "black",
                         color: "white",
                         cursor: "pointer",
                     }}
