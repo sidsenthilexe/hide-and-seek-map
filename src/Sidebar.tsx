@@ -58,7 +58,7 @@ export default function Sidebar({
                 overflowY: "auto",
             }}
         >
-            <h2 style={{ marginTop: 0 }}>Game</h2>
+            <h2 style={{ marginTop: 0 }}>Hide and Seek Map</h2>
 
             {!hasPlayingArea && !isDrawing ? (
                 <>
