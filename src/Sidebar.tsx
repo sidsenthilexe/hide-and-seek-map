@@ -181,17 +181,11 @@ export default function Sidebar({
                     <option value="out">Out</option>
                 </select>
                 <p style={{marginBottom: 8}}>
-                    {questionFlow.draft.centerPoint ? "Center selected" : "No center selected"}
+                    Click anywhere on the map to place the center.
                 </p>
-
-                <div style={{display: "flex", gap: 8, marginBottom: 8}}>
-                    <button
-                        onClick={onPickRadarCenter}
-                        className = {`sidebar-button ${questionFlow.draft.isPickingCenter}`}
-                    >
-                        Pick center
-                    </button>
-                </div>
+                <p style = {{marginBottom: 8, fontWeight: "bold"}}>
+                    {questionFlow.draft.centerPoint? "Center selected" : "No center selected"}
+                </p>
 
                 <div style={{display: "flex", gap: 8, marginTop: 16}}>
                     <button
