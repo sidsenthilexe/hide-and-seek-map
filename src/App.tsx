@@ -265,7 +265,7 @@ export default function App() {
     }
 
     if (mapMode === "radar-picking-center") {
-      commitRadarQuestion(point);
+      updateRadar({centerPoint: point, isPickingCenter: false})
     }
 };
 
@@ -298,6 +298,7 @@ export default function App() {
         onEditRadarQuestion={editRadarQuestion}
         onUpdateRadarDraft={updateRadar}
         onPickRadarCenter={pickRadarCenter}
+        onSaveRadarQuestion={saveRadarQuestion}
         onCancelQuestionFlow={cancelQuestionFlow}
       />
 

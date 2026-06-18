@@ -21,6 +21,7 @@ type SidebarProps = {
         result: RadarResult;
     }>) => void;
     onPickRadarCenter: () => void;
+    onSaveRadarQuestion: () => void;
     onCancelQuestionFlow: () => void;
 };
 
@@ -40,6 +41,7 @@ export default function Sidebar({
     onEditRadarQuestion,
     onUpdateRadarDraft,
     onPickRadarCenter,
+    onSaveRadarQuestion,
     onCancelQuestionFlow,
 }: SidebarProps) {
     const isDrawing = mode === "drawing";
@@ -187,18 +189,26 @@ export default function Sidebar({
                         onClick={onPickRadarCenter}
                         className = {`sidebar-button ${questionFlow.draft.isPickingCenter}`}
                     >
-                        {questionFlow.draft.isPickingCenter ? "Click map to save" : "Pick center"}
+                        Pick center
                     </button>
                 </div>
 
-                <p style={{marginBottom: 8}}>
-                    The radar saves when you click the map after picking the center.
-                </p>
+                <div style={{display: "flex", gap: 8, marginTop: 16}}>
+                    <button
+                        onClick={onSaveRadarQuestion}
+                        disabled={!questionFlow.draft.centerPoint || !Number(questionFlow.draft.radiusText)}
+                        className="sidebar-button sidebar-button-padded"
+                    >
+                        Save
+                    </button>
 
-                <button
-                    onClick={onCancelQuestionFlow}
-                    className = "sidebar-button"
-                >Cancel</button>
+                    <button
+                        onClick={onCancelQuestionFlow}
+                        className="sidebar-button sidebar-button-padded"
+                    >
+                        Cancel
+                    </button>
+                </div>
             </>
            ) : null}
 
