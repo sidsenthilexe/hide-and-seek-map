@@ -40,7 +40,6 @@ export default function Sidebar({
     onStartRadarQuestion,
     onEditRadarQuestion,
     onUpdateRadarDraft,
-    onPickRadarCenter,
     onSaveRadarQuestion,
     onCancelQuestionFlow,
 }: SidebarProps) {
