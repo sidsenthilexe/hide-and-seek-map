@@ -158,13 +158,14 @@ export default function App() {
   }>) => {
     if (
       questionFlow.kind == "radar" && questionFlow.draft.editingRadarId &&
-      (updates.radiusText !== undefined || updates.result !== undefined)
+      (updates.radiusText !== undefined || updates.result !== undefined || updates.centerPoint !== undefined)
     ) {
       const nextRadiusText = updates.radiusText ?? questionFlow.draft.radiusText;
       const nextResult = updates.result ?? questionFlow.draft.result;
+      const nextCenterPoint = updates.centerPoint !== undefined ? updates.centerPoint : questionFlow.draft.centerPoint;
       const radiusValue = Number(nextRadiusText);
 
-      if (Number.isFinite(radiusValue) && radiusValue > 0) {
+      if (Number.isFinite(radiusValue) && radiusValue > 0 && nextCenterPoint) {
         const radiusKm  = scaleUnit==="imperial" ? radiusValue *1.60934 : radiusValue;
         setRadarQuestions((current) =>
           current.map((question) =>
@@ -173,6 +174,7 @@ export default function App() {
               ...question,
               radiusKm,
               result: nextResult,
+              centerPoint: nextCenterPoint,
             }
             : question
           )
@@ -227,6 +229,28 @@ export default function App() {
         },
       };
     });
+  };
+
+  const saveRadarQuestion = () => {
+    if (questionFlow.kind !== "radar") return;
+    const radiusValue = Number(questionFlow.draft.radiusText);
+    if (!Number.isFinite(radiusValue) || radiusValue <= 0) return;
+    if (!questionFlow.draft.centerPoint) return;
+
+    const radiusKm = scaleUnit==="imperial" ? radiusValue * 1.60934 : radiusValue;
+    const nextQuestion: RadarQuestion = {
+      id: questionFlow.draft.editingRadarId ?? String(Date.now()) + String(Math.random()),
+      centerPoint: questionFlow.draft.centerPoint,
+      radiusKm: radiusKm,
+      result: questionFlow.draft.result,
+    };
+
+    setRadarQuestions((current) =>
+      questionFlow.draft.editingRadarId
+        ? current.map((question) => (question.id === questionFlow.draft.editingRadarId ? nextQuestion : question))
+        : [...current, nextQuestion]
+    );
+    setQuestionFlow({kind: "closed"});
   };
 
   const cancelQuestionFlow = () => {
