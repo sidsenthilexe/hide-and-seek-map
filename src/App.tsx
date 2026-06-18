@@ -2,14 +2,14 @@ import { useState } from "react";
 import MapView from "./MapView";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
-import type {MapInteractionMode, MapPoint, PlayingAreaMode, RadarQuestion, RadarResult, QuestionFlow} from "./Types";
+import type { MapInteractionMode, MapPoint, PlayingAreaMode, RadarQuestion, RadarResult, QuestionFlow } from "./Types";
 
 function pointsEqual(a: MapPoint, b: MapPoint) {
   return a[0] === b[0] && a[1] === b[1];
 }
 
 function orientation3(a: MapPoint, b: MapPoint, c: MapPoint) {
-  const val = (b[1] - a[1]) * (c[0] - b[0]) - (b[0] - a[0]) *  (c[1]-b[1]);
+  const val = (b[1] - a[1]) * (c[0] - b[0]) - (b[0] - a[0]) * (c[1] - b[1]);
   if (val === 0) return 0;
   return val > 0 ? 1 : 2;
 }
@@ -51,7 +51,7 @@ function wouldCreateIntersection(points: MapPoint[], newPoint: MapPoint) {
     return true;
   }
 
-  for (let i = 0; i < points.length-2; i++) {
+  for (let i = 0; i < points.length - 2; i++) {
     const segmentStart = points[i];
     const segmentEnd = points[i + 1];
 
@@ -65,10 +65,10 @@ function wouldCreateIntersection(points: MapPoint[], newPoint: MapPoint) {
 function edgeCloseWouldIntersect(points: MapPoint[]) {
   if (points.length < 3) return false;
   const firstPoint = points[0];
-  const lastPoint = points[points.length-1];
-  for(let i = 1; i < points.length - 2; i++) {
+  const lastPoint = points[points.length - 1];
+  for (let i = 1; i < points.length - 2; i++) {
     const segmentStart = points[i];
-    const segmentEnd = points[i+1];
+    const segmentEnd = points[i + 1];
     if (segmentsIntersect(lastPoint, firstPoint, segmentStart, segmentEnd)) {
       return true;
     }
@@ -83,7 +83,7 @@ export default function App() {
   const [mode, setMode] = useState<PlayingAreaMode>("idle");
   const [drawingPoints, setDrawingPoints] = useState<MapPoint[]>([]);
   const [playingArea, setPlayingArea] = useState<GeoJSON.Polygon | null>(null);
-  const [questionFlow, setQuestionFlow] = useState<QuestionFlow>({kind: "closed"});
+  const [questionFlow, setQuestionFlow] = useState<QuestionFlow>({ kind: "closed" });
   const [radarQuestions, setRadarQuestions] = useState<RadarQuestion[]>([]);
 
   const startDrawingArea = () => {
@@ -91,13 +91,13 @@ export default function App() {
     setDrawingPoints([]);
     setPlayingArea(null);
     setRadarQuestions([]);
-    setQuestionFlow({kind: "closed"});
+    setQuestionFlow({ kind: "closed" });
   };
 
   const cancelDrawingArea = () => {
     setMode("idle");
     setDrawingPoints([]);
-    setQuestionFlow({kind: "closed"})
+    setQuestionFlow({ kind: "closed" })
   }
 
   const finishDrawingArea = () => {
@@ -113,11 +113,11 @@ export default function App() {
   }
 
   const openQuestionMenu = () => {
-    setQuestionFlow({kind: "menu"});
+    setQuestionFlow({ kind: "menu" });
   }
 
   function formatRadarRadiusText(radiusKm: number, scaleUnit: "metric" | "imperial") {
-    const radiusValue = scaleUnit === "imperial" ? radiusKm/1.609344 : radiusKm;
+    const radiusValue = scaleUnit === "imperial" ? radiusKm / 1.609344 : radiusKm;
     return String(Number(radiusValue.toFixed(2)));
   }
 
@@ -162,13 +162,13 @@ export default function App() {
     const nextResult = updates.result !== undefined ? updates.result : questionFlow.draft.result;
     const nextCenterPoint = updates.centerPoint !== undefined ? updates.centerPoint : questionFlow.draft.centerPoint;
     const radiusValue = Number(nextRadiusText);
-      
+
     const previewId = questionFlow.draft.editingRadarId ?? "draft-radar";
 
-    if (!Number.isFinite  || radiusValue <= 0 || !nextCenterPoint) {
+    if (!Number.isFinite || radiusValue <= 0 || !nextCenterPoint) {
       setRadarQuestions((current) => current.filter((q) => q.id != previewId));
     } else {
-      const radiusKm  = scaleUnit==="imperial" ? radiusValue *1.60934 : radiusValue;
+      const radiusKm = scaleUnit === "imperial" ? radiusValue * 1.60934 : radiusValue;
       setRadarQuestions((current) => {
         const exists = current.some(q => q.id === previewId);
         const updatedQuestion: RadarQuestion = {
@@ -181,7 +181,7 @@ export default function App() {
         if (exists) { return current.map((q) => q.id === previewId ? updatedQuestion : q); }
         else { return [...current, updatedQuestion] }
       });
-        
+
     }
 
     setQuestionFlow((current) => {
@@ -197,7 +197,7 @@ export default function App() {
 
   };
 
-  
+
 
   const saveRadarQuestion = () => {
     if (questionFlow.kind !== "radar") return;
@@ -205,7 +205,7 @@ export default function App() {
     if (!Number.isFinite(radiusValue) || radiusValue <= 0) return;
     if (!questionFlow.draft.centerPoint) return;
 
-    const radiusKm = scaleUnit==="imperial" ? radiusValue * 1.60934 : radiusValue;
+    const radiusKm = scaleUnit === "imperial" ? radiusValue * 1.60934 : radiusValue;
     const finalId = questionFlow.draft.editingRadarId ?? String(Date.now()) + String(Math.random());
 
     const nextQuestion: RadarQuestion = {
@@ -221,17 +221,17 @@ export default function App() {
       }
       return current.map((q) => q.id === "draft-radar" ? nextQuestion : q);
     });
-    setQuestionFlow({kind: "closed"});
+    setQuestionFlow({ kind: "closed" });
   };
 
   const cancelQuestionFlow = () => {
     if (questionFlow.kind === "radar" && !questionFlow.draft.editingRadarId) {
       setRadarQuestions((current) => current.filter((q) => q.id !== "draft-radar"));
     }
-    setQuestionFlow({kind: "closed"});
+    setQuestionFlow({ kind: "closed" });
   }
 
-  const handleMapClick = (point:MapPoint) => {
+  const handleMapClick = (point: MapPoint) => {
     if (mapMode === "drawing") {
       if (wouldCreateIntersection(drawingPoints, point)) return;
       setDrawingPoints((current) => [...current, point]);
@@ -239,9 +239,9 @@ export default function App() {
     }
 
     if (mapMode === "radar-picking-center") {
-      updateRadar({centerPoint: point, isPickingCenter: false})
+      updateRadar({ centerPoint: point, isPickingCenter: false })
     }
-};
+  };
 
   const handleFirstPointClick = () => {
     if (drawingPoints.length >= 3) {
@@ -252,18 +252,18 @@ export default function App() {
   const mapMode: MapInteractionMode =
     mode === "drawing" ? "drawing"
       : questionFlow.kind === "radar" ? "radar-picking-center"
-      : "idle";
+        : "idle";
 
   return (
-    <div style={{width: "100vw", height: "100vh", display: "flex"}}>
+    <div style={{ width: "100vw", height: "100vh", display: "flex" }}>
       <Sidebar
         width={320}
         mode={mode}
         hasPlayingArea={playingArea !== null}
         pointsCount={drawingPoints.length}
         questionFlow={questionFlow}
-        scaleUnit = {scaleUnit}
-        radarQuestions = {radarQuestions}
+        scaleUnit={scaleUnit}
+        radarQuestions={radarQuestions}
         onCreatePlayingArea={startDrawingArea}
         onFinishPlayingArea={finishDrawingArea}
         onCancelPlayingArea={cancelDrawingArea}
@@ -275,7 +275,7 @@ export default function App() {
         onCancelQuestionFlow={cancelQuestionFlow}
       />
 
-      <div style={{position: "relative", flex: 1, height: "100%"}}>
+      <div style={{ position: "relative", flex: 1, height: "100%" }}>
         <MapView
           scaleUnit={scaleUnit}
           mode={mapMode}
@@ -286,25 +286,25 @@ export default function App() {
           onFirstPointClick={handleFirstPointClick}
         />
 
-      <button
-        onClick={() => setIsSettingsOpen(true)}
-        className = "sidebar-button"
-        style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          zIndex: 16,
-        }}
-      >
-        Settings
-      </button>
-      
-      <Settings
-        isOpen={isSettingsOpen}
-        scaleUnit={scaleUnit}
-        onChangeScaleUnit={setScaleUnit}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+        <button
+          onClick={() => setIsSettingsOpen(true)}
+          className="sidebar-button"
+          style={{
+            position: "absolute",
+            top: 16,
+            right: 16,
+            zIndex: 16,
+          }}
+        >
+          Settings
+        </button>
+
+        <Settings
+          isOpen={isSettingsOpen}
+          scaleUnit={scaleUnit}
+          onChangeScaleUnit={setScaleUnit}
+          onClose={() => setIsSettingsOpen(false)}
+        />
 
       </div>
     </div>

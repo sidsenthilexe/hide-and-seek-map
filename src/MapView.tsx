@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import type {MapInteractionMode, MapPoint, RadarQuestion} from "./Types";
+import type { MapInteractionMode, MapPoint, RadarQuestion } from "./Types";
 import { circle as turfCircle } from "@turf/turf";
 type ScaleUnit = "metric" | "imperial";
 
@@ -23,7 +23,7 @@ const SOURCE_DRAWING_POINTS = "drawing-points";
 const LAYER_PLAYING_FILL = "playing-area-fill";
 const LAYER_PLAYING_OUTLINE = "playing-area-outline";
 const LAYER_DRAWING_LINE = "drawing-line-layer";
-const LAYER_DRAWING_POINTS =  "drawing-points-layer";
+const LAYER_DRAWING_POINTS = "drawing-points-layer";
 const PX_TOLERANCE = 20;
 
 const SOURCE_RADAR_CENTERS = "radar-centers";
@@ -32,7 +32,7 @@ const LAYER_RADAR_FILL = "radar-areas-fill";
 const LAYER_RADAR_OUTLINE = "radar-areas-outline";
 const LAYER_RADAR_CENTERS = "radar-centers-layer";
 
-function collectionFromRadarCenters(radarQuestions: RadarQuestion[]) : GeoJSON.FeatureCollection<GeoJSON.Point> {
+function collectionFromRadarCenters(radarQuestions: RadarQuestion[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
     return {
         type: "FeatureCollection",
         features: radarQuestions.map((question) => ({
@@ -48,7 +48,7 @@ function collectionFromRadarCenters(radarQuestions: RadarQuestion[]) : GeoJSON.F
     };
 }
 
-function collectionFromRadarAreas(radarQuestions: RadarQuestion[]) : GeoJSON.FeatureCollection<GeoJSON.Polygon> {
+function collectionFromRadarAreas(radarQuestions: RadarQuestion[]): GeoJSON.FeatureCollection<GeoJSON.Polygon> {
     return {
         type: "FeatureCollection",
         features: radarQuestions.map((question) => {
@@ -92,7 +92,7 @@ function collectionFromPoints(points: MapPoint[]): GeoJSON.FeatureCollection<Geo
     };
 }
 
-function featureFromPolygon(polygon: GeoJSON.Polygon | null) : GeoJSON.Feature<GeoJSON.Polygon> | null {
+function featureFromPolygon(polygon: GeoJSON.Polygon | null): GeoJSON.Feature<GeoJSON.Polygon> | null {
     if (!polygon) return null;
     return {
         type: "Feature",
@@ -111,21 +111,21 @@ export default function MapView({
     onFirstPointClick,
 }: MapViewProps) {
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
-    const mapRef =useRef<Map | null>(null);
+    const mapRef = useRef<Map | null>(null);
     const protomapsKey = import.meta.env.VITE_PROTOMAPS_KEY;
-    const scaleRef =  useRef<maplibregl.ScaleControl | null>(null);
+    const scaleRef = useRef<maplibregl.ScaleControl | null>(null);
 
     const drawingLineData = useMemo(() => {
-        if(drawingPoints.length< 2)return null;
+        if (drawingPoints.length < 2) return null;
         return lineFromPoints(drawingPoints);
     }, [drawingPoints]);
 
     const drawingPointData = useMemo(() => {
-        if(drawingPoints.length === 0) return null;
+        if (drawingPoints.length === 0) return null;
         return collectionFromPoints(drawingPoints);
     }, [drawingPoints]);
 
-    const playingAreaFeature =  useMemo(() => featureFromPolygon(playingArea), [playingArea]);
+    const playingAreaFeature = useMemo(() => featureFromPolygon(playingArea), [playingArea]);
 
     const radarCentersData = useMemo(() => collectionFromRadarCenters(radarQuestions), [radarQuestions]);
 
@@ -144,13 +144,13 @@ export default function MapView({
         mapRef.current = map;
 
         const addSourcesAndLayers = () => {
-            if(!map.getSource(SOURCE_PLAYING_AREA)) {
+            if (!map.getSource(SOURCE_PLAYING_AREA)) {
                 map.addSource(SOURCE_PLAYING_AREA, {
                     type: "geojson",
                     data:
                         playingAreaFeature ??
                         ({
-                            type:  "Feature",
+                            type: "Feature",
                             properties: {},
                             geometry: {
                                 type: "Polygon",
@@ -168,7 +168,7 @@ export default function MapView({
                         ({
                             type: "Feature",
                             properties: {},
-                            geometry:  {
+                            geometry: {
                                 type: "LineString",
                                 coordinates: [[0, 0], [0, 0]],
                             },
@@ -231,23 +231,23 @@ export default function MapView({
                     id: LAYER_DRAWING_LINE,
                     type: "line",
                     source: SOURCE_DRAWING_LINE,
-                    paint:{
+                    paint: {
                         "line-color": "orange",
                         "line-width": 3,
-                        "line-dasharray": [2,1],
+                        "line-dasharray": [2, 1],
                     },
                 });
             }
 
-            if  (!map.getLayer(LAYER_DRAWING_POINTS)) {
+            if (!map.getLayer(LAYER_DRAWING_POINTS)) {
                 map.addLayer({
                     id: LAYER_DRAWING_POINTS,
                     type: "circle",
                     source: SOURCE_DRAWING_POINTS,
                     paint: {
-                        "circle-radius" : 5,
-                        "circle-color" : "orange",
-                        "circle-stroke-width":  2,
+                        "circle-radius": 5,
+                        "circle-color": "orange",
+                        "circle-stroke-width": 2,
                         "circle-stroke-color": "black",
                     },
                 });
@@ -259,8 +259,8 @@ export default function MapView({
                     type: "fill",
                     source: SOURCE_RADAR_AREAS,
                     paint: {
-                        "fill-color" : ["match", ["get", "result"], "in", "#2ecc71", "out", "#e74c3c", "#95a5a6"],
-                        "fill-opacity" : 0.16,
+                        "fill-color": ["match", ["get", "result"], "in", "#2ecc71", "out", "#e74c3c", "#95a5a6"],
+                        "fill-opacity": 0.16,
                     },
                 });
             }
@@ -292,10 +292,10 @@ export default function MapView({
             }
         };
 
-        if(map.isStyleLoaded()) {
+        if (map.isStyleLoaded()) {
             addSourcesAndLayers();
         } else {
-            map.on("load",  addSourcesAndLayers);
+            map.on("load", addSourcesAndLayers);
         }
 
         scaleRef.current = new maplibregl.ScaleControl({
@@ -310,7 +310,7 @@ export default function MapView({
             scaleRef.current = null;
         };
     }, [protomapsKey]);
-     
+
     useEffect(() => {
         if (!mapRef.current) return;
 
@@ -346,7 +346,7 @@ export default function MapView({
             const firstPos = map.project([firstLng, firstLat]);
             const clickPos = event.point;
 
-            const dist = Math.sqrt(Math.pow(firstPos.x-clickPos.x, 2) + Math.pow(firstPos.y-clickPos.y, 2));
+            const dist = Math.sqrt(Math.pow(firstPos.x - clickPos.x, 2) + Math.pow(firstPos.y - clickPos.y, 2));
 
             if (dist < PX_TOLERANCE) { onFirstPointClick(); }
         };
@@ -391,7 +391,7 @@ export default function MapView({
                             coordinates: [[[0, 0]]],
                         },
                     } as GeoJSON.Feature<GeoJSON.Polygon>)
-                    
+
             );
         }
 
@@ -443,6 +443,6 @@ export default function MapView({
 
     }, [mode, drawingPoints, playingAreaFeature, drawingLineData, drawingPointData, radarAreasData, radarCentersData,]);
 
-    return <div ref={mapContainerRef} style={{width: "100%", height: "100%"}} />
+    return <div ref={mapContainerRef} style={{ width: "100%", height: "100%" }} />
 
 }

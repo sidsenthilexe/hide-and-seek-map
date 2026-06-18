@@ -11,9 +11,9 @@ export type RadarQuestion = {
     result: RadarResult;
 }
 
-export type QuestionFlow = 
-    | {kind: "closed"}
-    | {kind: "menu"}
+export type QuestionFlow =
+    | { kind: "closed" }
+    | { kind: "menu" }
     | {
         kind: "radar";
         draft: {
