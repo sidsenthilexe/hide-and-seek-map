@@ -170,6 +170,7 @@ export default function Sidebar({
                         padding: 8,
                         borderRadius: 8,
                         border: "1px solid gray",
+                        background: "black",
                         color: "white",
                         boxSizing: "border-box",
                     }}

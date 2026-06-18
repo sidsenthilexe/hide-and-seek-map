@@ -229,26 +229,6 @@ export default function App() {
     });
   };
 
-  const saveRadarQuestion = () => {
-    if (questionFlow.kind !== "radar") return;
-    const centerPoint = questionFlow.draft.centerPoint;
-    if (!centerPoint) return;
-
-    const radiusValue = Number(questionFlow.draft.radiusText);
-    if (!Number.isFinite(radiusValue) || radiusValue <= 0) return;
-    const radiusKm = scaleUnit==="imperial" ? radiusValue * 1.609344 : radiusValue;
-    setRadarQuestions((current) => [
-      ...current,
-      {
-        id: String(Date.now()) + String(Math.random()),
-        centerPoint,
-        radiusKm: radiusKm,
-        result: questionFlow.draft.result,
-      },
-    ]);
-    setQuestionFlow({kind: "closed"});
-  };
-
   const cancelQuestionFlow = () => {
     setQuestionFlow({kind: "closed"});
   }
@@ -310,17 +290,12 @@ export default function App() {
 
       <button
         onClick={() => setIsSettingsOpen(true)}
+        className = "sidebar-button"
         style={{
           position: "absolute",
           top: 16,
           right: 16,
           zIndex: 16,
-          padding: "8px 16px",
-          borderRadius: 8,
-          border: "1px solid lightgray",
-          background: "black",
-          color: "white",
-          cursor: "pointer",
         }}
       >
         Settings
