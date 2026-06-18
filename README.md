@@ -11,3 +11,5 @@ This is a project inspired by Jet Lag The Game's Hide and Seek, built for Hack C
 * Create radar questions to narrow down where the hider is
 * Radars have a live preview
 * Previously asked questions are displayed and can be edited
+
+<sup>As this was my first project in typescript, some AI was used for reference.</sup>
