@@ -305,7 +305,6 @@ export default function App() {
         onStartRadarQuestion={radarQuestion}
         onEditRadarQuestion={editRadarQuestion}
         onUpdateRadarDraft={updateRadar}
-        onPickRadarCenter={pickRadarCenter}
         onSaveRadarQuestion={saveRadarQuestion}
         onCancelQuestionFlow={cancelQuestionFlow}
       />

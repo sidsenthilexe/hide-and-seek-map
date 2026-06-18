@@ -20,7 +20,6 @@ type SidebarProps = {
         radiusText: string;
         result: RadarResult;
     }>) => void;
-    onPickRadarCenter: () => void;
     onSaveRadarQuestion: () => void;
     onCancelQuestionFlow: () => void;
 };
