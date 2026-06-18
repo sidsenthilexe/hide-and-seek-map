@@ -218,21 +218,6 @@ export default function App() {
     setQuestionFlow({kind: "closed"});
   }
 
-  
-
-  const pickRadarCenter = () => {
-    setQuestionFlow((current) => {
-      if (current.kind !== "radar") return current;
-      return {
-        kind: "radar",
-        draft: {
-          ...current.draft,
-          isPickingCenter: true,
-        },
-      };
-    });
-  };
-
   const saveRadarQuestion = () => {
     if (questionFlow.kind !== "radar") return;
     const radiusValue = Number(questionFlow.draft.radiusText);
