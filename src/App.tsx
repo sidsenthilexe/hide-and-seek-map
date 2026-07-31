@@ -378,7 +378,7 @@ export default function App() {
     const nextQuestion: LatitudeQuestion = {
       id: finalId,
       point: questionFlow.draft.point,
-      result: questionFlow.draft.result;
+      result: questionFlow.draft.result,
     };
 
     setLatitudeQuestions((current) => {
