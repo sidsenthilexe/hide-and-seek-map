@@ -12,4 +12,14 @@ This is a project inspired by Jet Lag The Game's Hide and Seek, built for Hack C
 * Radars have a live preview
 * Previously asked questions are displayed and can be edited
 
+## Usage
+* Use the `Settings` button to switch between imperial and metric measurements
+* Select `Set Playing Area` to start drawing the game area
+* Click on the map to draw the playing area
+* After placing at least 3 points, click on the initial point or select `Finish area` to close the shape
+* Select `Ask Question` -> `Radar` to ask a radar question
+* Select the radius of the radar and whether the hider is in or out of the area
+* Click on the map to place the center of the radar and then click `Save`
+* Continue asking questions to narrow down the search area or select `Edit` to change the details of a previously asked quetsion
+
 <sup>As this was my first project in typescript, some AI was used for reference.</sup>
