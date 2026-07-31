@@ -436,7 +436,15 @@ export default function App() {
     }
 
     if (mapMode === "radar-picking-center") {
-      updateRadar({ centerPoint: point})
+      updateRadar({centerPoint: point})
+    }
+
+    if (mapMode === "latitude-picking-point") {
+      updateLatitude({point});
+    }
+
+    if (mapMode === "longitude-picking-point") {
+      updateLongitude({point});
     }
   };
 
@@ -449,7 +457,9 @@ export default function App() {
   const mapMode: MapInteractionMode =
     mode === "drawing" ? "drawing"
       : questionFlow.kind === "radar" ? "radar-picking-center"
-        : "idle";
+        : questionFlow.kind === "latitude" ? "latitude-picking-point"
+          : questionFlow.kind === "longitude" ? "longitude-picking-point"
+            : "idle";
 
   return (
     <div style={{ width: "100vw", height: "100vh", display: "flex" }}>
@@ -461,14 +471,24 @@ export default function App() {
         questionFlow={questionFlow}
         scaleUnit={scaleUnit}
         radarQuestions={radarQuestions}
+        latitudeQuestions={latitudeQuestions}
+        longitudeQuestions={longitudeQuestions}
         onCreatePlayingArea={startDrawingArea}
         onFinishPlayingArea={finishDrawingArea}
         onCancelPlayingArea={cancelDrawingArea}
         onOpenQuestionMenu={openQuestionMenu}
         onStartRadarQuestion={startRadarQuestion}
+        onStartLatitudeQuestion={editLatitudeQuestion}
+        onStartLongitudeQuestion={editLongitudeQuestion}
         onEditRadarQuestion={editRadarQuestion}
+        onEditLatitudeQuestion={editLatitudeQuestion}
+        onEditLongitudeQuestion={editLongitudeQuestion}
         onUpdateRadarDraft={updateRadar}
+        onUpdateLatitudeDraft={updateLatitude}
+        onUpdateLongitudeDraft={updateLongitude}
         onSaveRadarQuestion={saveRadarQuestion}
+        onSaveLatitudeQuestion={saveLatitudeQuestion}
+        onSaveLongitudeQuestion={saveLongitudeQuestion}
         onCancelQuestionFlow={cancelQuestionFlow}
       />
 
