@@ -478,8 +478,8 @@ export default function App() {
         onCancelPlayingArea={cancelDrawingArea}
         onOpenQuestionMenu={openQuestionMenu}
         onStartRadarQuestion={startRadarQuestion}
-        onStartLatitudeQuestion={editLatitudeQuestion}
-        onStartLongitudeQuestion={editLongitudeQuestion}
+        onStartLatitudeQuestion={startLatitudeQuestion}
+        onStartLongitudeQuestion={startLongitudeQuestion}
         onEditRadarQuestion={editRadarQuestion}
         onEditLatitudeQuestion={editLatitudeQuestion}
         onEditLongitudeQuestion={editLongitudeQuestion}

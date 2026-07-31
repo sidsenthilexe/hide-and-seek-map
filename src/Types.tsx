@@ -9,7 +9,7 @@ export type MapInteractionMode =
 
 export type RadarResult = "in" | "out";
 export type LatitudeResult = "above" | "below";
-export type LongitudeResult = "above" | "below";
+export type LongitudeResult = "left" | "right";
 
 export type RadarQuestion = {
     id: string;
