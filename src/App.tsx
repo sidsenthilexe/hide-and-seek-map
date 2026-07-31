@@ -2,7 +2,17 @@ import { useState } from "react";
 import MapView from "./MapView";
 import Settings from "./Settings";
 import Sidebar from "./Sidebar";
-import type { MapInteractionMode, MapPoint, PlayingAreaMode, RadarQuestion, RadarResult, QuestionFlow } from "./Types";
+import type { 
+  LatitudeQuestion,
+  LatitudeResult,
+  LongitudeQuestion,
+  LongitudeResult,
+  MapInteractionMode, 
+  MapPoint, 
+  PlayingAreaMode, 
+  RadarQuestion, 
+  RadarResult,
+  QuestionFlow } from "./Types";
 
 function pointsEqual(a: MapPoint, b: MapPoint) {
   return a[0] === b[0] && a[1] === b[1];
