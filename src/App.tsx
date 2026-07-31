@@ -499,6 +499,8 @@ export default function App() {
           drawingPoints={drawingPoints}
           playingArea={playingArea}
           radarQuestions={radarQuestions}
+          latitudeQuestions={latitudeQuestions}
+          longitudeQuestions={longitudeQuestions}
           onMapClick={handleMapClick}
           onFirstPointClick={handleFirstPointClick}
         />
