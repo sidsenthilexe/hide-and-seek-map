@@ -86,6 +86,18 @@ function edgeCloseWouldIntersect(points: MapPoint[]) {
   return false;
 }
 
+function addOrUpdate<T extends{id: string}>(items: T[], item: T) {
+  const exists = items.some((currentItem) => currentItem.id === item.id);
+  if (exists) {
+    return items.map((currentItem) => (currentItem.id === item.id ? item : currentItem));
+  }
+  return [...items, item];
+}
+
+const DRAFT_RADAR_ID = "draft-radar";
+const DRAFT_LATITUDE_ID = "draft-latitude";
+const DRAFT_LONGITUDE_ID = "draft-longitude";
+
 export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [scaleUnit, setScaleUnit] = useState<"metric" | "imperial">("imperial");
@@ -94,13 +106,18 @@ export default function App() {
   const [drawingPoints, setDrawingPoints] = useState<MapPoint[]>([]);
   const [playingArea, setPlayingArea] = useState<GeoJSON.Polygon | null>(null);
   const [questionFlow, setQuestionFlow] = useState<QuestionFlow>({ kind: "closed" });
+
   const [radarQuestions, setRadarQuestions] = useState<RadarQuestion[]>([]);
+  const [latitudeQuestions, setLatitudeQuestions] = useState<LatitudeQuestion[]>([]);
+  const [longitudeQuestions, setLongitudeQuestions] = useState<LongitudeQuestion[]>([]);
 
   const startDrawingArea = () => {
     setMode("drawing");
     setDrawingPoints([]);
     setPlayingArea(null);
     setRadarQuestions([]);
+    setLatitudeQuestions([]);
+    setLongitudeQuestions([]);
     setQuestionFlow({ kind: "closed" });
   };
 
@@ -131,15 +148,36 @@ export default function App() {
     return String(Number(radiusValue.toFixed(2)));
   }
 
-  const radarQuestion = () => {
+  const startRadarQuestion = () => {
     setQuestionFlow({
       kind: "radar",
       draft: {
         radiusText: "1",
         result: "out",
         centerPoint: null,
-        isPickingCenter: false,
         editingRadarId: null,
+      },
+    });
+  };
+
+  const startLatitudeQuestion = () => {
+    setQuestionFlow({
+      kind: "latitude",
+      draft: {
+        result: "above",
+        point: null,
+        editingLatitudeId: null,
+      },
+    });
+  };
+
+  const startLongitudeQuestion = () => {
+    setQuestionFlow({
+      kind: "latitude",
+      draft: {
+        result: "above",
+        point: null,
+        editingLatitudeId: null,
       },
     });
   };
@@ -154,8 +192,35 @@ export default function App() {
         radiusText: formatRadarRadiusText(radarQuestion.radiusKm, scaleUnit),
         result: radarQuestion.result,
         centerPoint: radarQuestion.centerPoint,
-        isPickingCenter: false,
         editingRadarId: radarQuestion.id,
+      },
+    });
+  };
+
+  const editLatitudeQuestion = (latitudeQuestionId: string) => {
+    const latitudeQuestion = latitudeQuestions.find((question) => question.id === latitudeQuestionId);
+    if (!latitudeQuestion) return;
+
+    setQuestionFlow({
+      kind: "latitude",
+      draft: {
+        result: latitudeQuestion.result,
+        point: latitudeQuestion.point,
+        editingLatitudeId: latitudeQuestion.id,
+      },
+    });
+  };
+
+  const editLongitudeQuestion = (longitudeQuestionId: string) => {
+    const longitudeQuestion = longitudeQuestions.find((question) => question.id === longitudeQuestionId);
+    if (!longitudeQuestion) return;
+
+    setQuestionFlow({
+      kind: "longitude",
+      draft: {
+        result: longitudeQuestion.result,
+        point: longitudeQuestion.point,
+        editingLongitudeId: longitudeQuestion.id,
       },
     });
   };
@@ -164,7 +229,6 @@ export default function App() {
     radiusText: string;
     result: RadarResult;
     centerPoint: MapPoint | null;
-    isPickingCenter: boolean;
   }>) => {
     if (questionFlow.kind !== "radar") return;
 
@@ -173,24 +237,24 @@ export default function App() {
     const nextCenterPoint = updates.centerPoint !== undefined ? updates.centerPoint : questionFlow.draft.centerPoint;
     const radiusValue = Number(nextRadiusText);
 
-    const previewId = questionFlow.draft.editingRadarId ?? "draft-radar";
+    const previewId = questionFlow.draft.editingRadarId ?? DRAFT_RADAR_ID;
+    const isEditingExistingQuestion = questionFlow.draft.editingRadarId !== null;
+    const hasValidDraft = Number.isFinite(radiusValue) && radiusValue > 0 && nextCenterPoint;
 
-    if (!Number.isFinite || radiusValue <= 0 || !nextCenterPoint) {
-      setRadarQuestions((current) => current.filter((q) => q.id != previewId));
+    if (!hasValidDraft) {
+      if (!isEditingExistingQuestion){
+        setRadarQuestions((current) => current.filter((question) => question.id != previewId));
+      }
     } else {
       const radiusKm = scaleUnit === "imperial" ? radiusValue * 1.60934 : radiusValue;
-      setRadarQuestions((current) => {
-        const exists = current.some(q => q.id === previewId);
-        const updatedQuestion: RadarQuestion = {
-          id: previewId,
-          centerPoint: nextCenterPoint,
-          radiusKm,
-          result: nextResult,
-        };
+      const updatedQuestion: RadarQuestion = {
+        id: previewId,
+        centerPoint: nextCenterPoint,
+        radiusKm,
+        result: nextResult,
+      };
 
-        if (exists) { return current.map((q) => q.id === previewId ? updatedQuestion : q); }
-        else { return [...current, updatedQuestion] }
-      });
+      setRadarQuestions((current) => addOrUpdate(current, updatedQuestion));
 
     }
 
@@ -206,6 +270,78 @@ export default function App() {
     });
 
   };
+
+  const updateLatitude = (updates: Partial<{
+    result: LatitudeResult;
+    point: MapPoint | null;
+  }>) => {
+    if (questionFlow.kind !== "latitude") return;
+
+    const nextPoint = updates.point !== undefined? updates.point : questionFlow.draft.point;
+    const nextResult = updates.result !== undefined? updates.result : questionFlow.draft.result;
+    const previewId = questionFlow.draft.editingLatitudeId ?? DRAFT_LATITUDE_ID;
+    const isEditingExistingQuestion = questionFlow.draft.editingLatitudeId !== null;
+
+    if (!nextPoint){
+      if (!isEditingExistingQuestion) {
+        setLatitudeQuestions((current) => current.filter((question) => question.id !== previewId));
+      }
+    } else {
+      const updatedQuestion: LatitudeQuestion = {
+        id: previewId,
+        point: nextPoint,
+        result: nextResult,
+      };
+      setLatitudeQuestions((current) => addOrUpdate(current, updatedQuestion));
+    }
+
+    setQuestionFlow((current) => {
+      if (current.kind !== "latitude") return current;
+      return {
+        kind: "latitude",
+        draft: {
+          ...current.draft,
+          ...updates,
+        },
+      };
+    });
+  };
+
+  const updateLongitude = (updates: Partial<{
+    result: LongitudeResult;
+    point: MapPoint | null;
+  }>) => {
+    if (questionFlow.kind !== "longitude") return;
+
+    const nextPoint = updates.point !== undefined? updates.point : questionFlow.draft.point;
+    const nextResult = updates.result !== undefined? updates.result : questionFlow.draft.result;
+    const previewId = questionFlow.draft.editingLongitudeId ?? DRAFT_LONGITUDE_ID;
+    const isEditingExistingQuestion = questionFlow.draft.editingLongitudeId !== null;
+
+    if (!nextPoint) {
+      if (!isEditingExistingQuestion) {
+        setLongitudeQuestions((current) => current.filter((question) => question.id !== previewId));
+      }
+    } else {
+      const updatedQuestion: LongitudeQuestion = {
+        id: previewId,
+        point: nextPoint,
+        result: nextResult,
+      };
+      setLongitudeQuestions((current) => addOrUpdate(current, updatedQuestion));
+    }
+
+    setQuestionFlow((current) => {
+      if (current.kind !== "longitude") return current;
+      return {
+        kind: "longitude",
+        draft: {
+          ...current.draft,
+          ...updates,
+        },
+      };
+    });
+  }
 
 
 
@@ -229,15 +365,66 @@ export default function App() {
       if (questionFlow.draft.editingRadarId) {
         return current.map((q) => q.id === finalId ? nextQuestion : q);
       }
-      return current.map((q) => q.id === "draft-radar" ? nextQuestion : q);
+      return current.map((q) => q.id === DRAFT_RADAR_ID ? nextQuestion : q);
     });
     setQuestionFlow({ kind: "closed" });
   };
 
+  const saveLatitudeQuestion = () => {
+    if (questionFlow.kind !== "latitude") return;
+    if (!questionFlow.draft.point) return;
+
+    const finalId = questionFlow.draft.editingLatitudeId ?? String(Date.now()) + String(Math.random());
+    const nextQuestion: LatitudeQuestion = {
+      id: finalId,
+      point: questionFlow.draft.point,
+      result: questionFlow.draft.result;
+    };
+
+    setLatitudeQuestions((current) => {
+      if (questionFlow.draft.editingLatitudeId) {
+        return current.map((q) => (q.id == finalId ? nextQuestion : q));
+      }
+      return current.map((q) => (q.id === DRAFT_LATITUDE_ID ? nextQuestion : q));
+    });
+
+    setQuestionFlow({kind: "closed"});
+  };
+
+  const saveLongitudeQuestion = () => {
+    if (questionFlow.kind !== "longitude") return;
+    if (!questionFlow.draft.point) return;
+
+    const finalId = questionFlow.draft.editingLongitudeId ?? String(Date.now()) + String(Math.random());
+    const nextQuestion: LongitudeQuestion = {
+      id: finalId,
+      point: questionFlow.draft.point,
+      result: questionFlow.draft.result,
+    };
+
+    setLongitudeQuestions((current) => {
+      if (questionFlow.draft.editingLongitudeId) {
+        return current.map((q) => (q.id === finalId ? nextQuestion : q));
+      }
+      return current.map((q) => (q.id === DRAFT_LONGITUDE_ID ? nextQuestion : q));
+    })
+
+    setQuestionFlow({kind: "closed"})
+  }
+
   const cancelQuestionFlow = () => {
     if (questionFlow.kind === "radar" && !questionFlow.draft.editingRadarId) {
-      setRadarQuestions((current) => current.filter((q) => q.id !== "draft-radar"));
+      setRadarQuestions((current) => current.filter((q) => q.id !== DRAFT_RADAR_ID));
     }
+
+    if (questionFlow.kind === "latitude" && !questionFlow.draft.editingLatitudeId) {
+      setLatitudeQuestions((current) => current.filter((q) => q.id !== DRAFT_LATITUDE_ID));
+    }
+
+    if (questionFlow.kind === "longitude" && !questionFlow.draft.editingLongitudeId) {
+      setLongitudeQuestions((current) => current.filter((q) => q.id !== DRAFT_LONGITUDE_ID))
+    }
+
     setQuestionFlow({ kind: "closed" });
   }
 
@@ -249,7 +436,7 @@ export default function App() {
     }
 
     if (mapMode === "radar-picking-center") {
-      updateRadar({ centerPoint: point, isPickingCenter: false })
+      updateRadar({ centerPoint: point})
     }
   };
 
@@ -278,7 +465,7 @@ export default function App() {
         onFinishPlayingArea={finishDrawingArea}
         onCancelPlayingArea={cancelDrawingArea}
         onOpenQuestionMenu={openQuestionMenu}
-        onStartRadarQuestion={radarQuestion}
+        onStartRadarQuestion={startRadarQuestion}
         onEditRadarQuestion={editRadarQuestion}
         onUpdateRadarDraft={updateRadar}
         onSaveRadarQuestion={saveRadarQuestion}

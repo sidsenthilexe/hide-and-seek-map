@@ -39,7 +39,6 @@ export type QuestionFlow =
             radiusText: string;
             result: RadarResult;
             centerPoint: MapPoint | null;
-            isPickingCenter: boolean;
             editingRadarId: string | null;
         };
     }
