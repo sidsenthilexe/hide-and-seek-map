@@ -8,8 +8,8 @@ This is a project inspired by Jet Lag The Game's Hide and Seek, built for Hack C
 ## Features implemented so far
 * Choose between imperial and metric measurements
 * Create a custom playing area anywhere in the world
-* Create radar questions to narrow down where the hider is
-* Radars have a live preview
+* Create radar, latitude, and longitude questions to narrow down where the hider is
+* All questions have a live preview
 * Previously asked questions are displayed and can be edited
 
 ## Usage
@@ -20,6 +20,8 @@ This is a project inspired by Jet Lag The Game's Hide and Seek, built for Hack C
 * Select `Ask Question` -> `Radar` to ask a radar question
 * Select the radius of the radar and whether the hider is in or out of the area
 * Click on the map to place the center of the radar and then click `Save`
+* Select `Ask Question` -> `Latitude` or `Longitude` to ask a Latitude or Longitude question
+* Select where you are on the map, and whether the hider is above, below, left, or right of you on the map, and hit `Save`
 * Continue asking questions to narrow down the search area or select `Edit` to change the details of a previously asked quetsion
 
 <sup>As this was my first project in typescript, some AI was used for reference.</sup>
