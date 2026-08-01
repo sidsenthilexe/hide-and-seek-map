@@ -173,11 +173,11 @@ export default function App() {
 
   const startLongitudeQuestion = () => {
     setQuestionFlow({
-      kind: "latitude",
+      kind: "longitude",
       draft: {
-        result: "above",
+        result: "left",
         point: null,
-        editingLatitudeId: null,
+        editingLongitudeId: null,
       },
     });
   };

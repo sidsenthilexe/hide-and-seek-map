@@ -406,7 +406,7 @@ export default function MapView({
                     type: "line",
                     source: SOURCE_LATITUDE_LINES,
                     paint: {
-                        "line-color": ["match", ["get", "result"], "above", "#2ecc71", "out", "#e74c3c", "#95a5a6"],
+                        "line-color": ["match", ["get", "result"], "above", "#2ecc71", "below", "#e74c3c", "#95a5a6"],
                         "line-width": 2,
                     }
                 })
@@ -419,7 +419,7 @@ export default function MapView({
                     source: SOURCE_LATITUDE_POINTS,
                     paint: {
                         "circle-radius": 6,
-                        "circle-color": ["match", ["get", "result"], "above", "#2ecc71", "below", "#e74c3c", "95a5a6"],
+                        "circle-color": ["match", ["get", "result"], "above", "#2ecc71", "below", "#e74c3c", "#95a5a6"],
                         "circle-stroke-width": 2,
                         "circle-stroke-color": "black",
                     },
